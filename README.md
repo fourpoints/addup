@@ -1,6 +1,9 @@
 # Markplus
 Interpreter from whitespace dependent markplus to html.
 
+In markup+.py, change `file_to_read` to your markplus-file, and change `file_to_write` to choose a name for your html-file.
+If you're using spaces instead of tabs, change the `indent` input in the `Filereader` constructor. (Note: this will currently not work for `+("file.extension")`-loaded files).
+
 Example  
 ```
 <!doctype html>
