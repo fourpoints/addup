@@ -1,10 +1,10 @@
 # Markplus
 Interpreter from the whitespace dependent markup language **markplus** to HTML.
 
-
 ### How to
-In markup+.py, change `file_to_read` to your markplus-file, and change `file_to_write` to choose a name for your html-file.
+In `markup+.py`, change `file_to_read` to your markplus-file, and change `file_to_write` to choose a name for your HTML-file.
 If you're using spaces instead of tabs, change the `indent` input in the `Filereader` constructor. (Note: this will currently not work for `+("file.extension")`-loaded files).
+To add a new customized tag, include an entry in `custom_tags.py`.
 
 ### Example
 ```
@@ -59,17 +59,17 @@ If you're using spaces instead of tabs, change the `indent` input in the `Filere
 ```
 
 ### Additional features
-* Define custom tags, so instead of typing `+div(class="head")`, you may define a `+Head`-tag in custom_tags.py
-* Read from multiple files. By writing `+("file.extension")` the interpreter will start reading from another file, allowing you to combine multiple files into a single html-file.
+- Define custom tags. Instead of typing `+div(class="head")`, you may define a `+Head`-tag in `custom_tags.py`.
+- Read from multiple files. By writing `+("file.extension")` the interpreter will start reading from another file, allowing you to combine multiple files into a single HTML-file.
 
 ### Planned updates
-- Support for the `<pre>`-tag  
-- Remove whitespace between tags on different lines `</tag><!-- --><tag>`  
+- Support for the `<pre>`-tag.  
+- Remove whitespace between tags on different lines `</tag><!-- --><tag>`.  
 - Fix indenting in loaded files.
 
 ### Possible updates
-- Add possibility for simple custom interpreters
+- Add possibility for simple custom interpreters.
 
 ### Update log
-v470711a - Convert `+h3 title` to `<h3>title</h3>` instead of (current) `<h3> title</h3>`
-v470710a - Markplus added to GitHub
+v470711a - Convert `+h3 title` to `<h3>title</h3>` instead of (current) `<h3> title</h3>`.  
+v470710a - Markplus added to GitHub.
