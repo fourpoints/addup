@@ -61,15 +61,3 @@ To add a new customized tag, include an entry in `custom_tags.py`.
 ### Additional features
 - Define custom tags. Instead of typing `+div(class="head")`, you may define a `+Head`-tag in `custom_tags.py`.
 - Read from multiple files. By writing `+("file.extension")` the interpreter will start reading from another file, allowing you to combine multiple files into a single HTML-file.
-
-### Planned updates
-- Support for the `<pre>`-tag.  
-- Remove whitespace between tags on different lines `</tag><!-- --><tag>`.  
-- Fix indenting in loaded files.
-
-### Possible updates
-- Add possibility for simple custom interpreters.
-
-### Update log
-v470711a - Convert `+h3 title` to `<h3>title</h3>` instead of (current) `<h3> title</h3>`.  
-v470710a - Markplus added to GitHub.
