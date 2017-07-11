@@ -19,17 +19,17 @@ def default_interpreter(Read, Write):
 		if line.string == '': break #last line
 		
 		#get the indentation change
-		indent_change = Read.indent_change(line.string)
+		Read.indent_change(line.string)
 		
 		#pop off tags if no indent change
-		if indent_change == 0 and Write.tag_in_line:
+		if Read.indent_count <= Read.prev_indent_count and Write.tag_in_line:
 			Read.pop_inline()
 		
 		#newline (this comment is redundant)
 		Write.newline()
 		
 		#pop off end tags if line is dedented relatively to last line
-		if indent_change <= 0:
+		if Read.indent_count <= Read.prev_indent_count:
 			Read.pop_tags()
 			
 		#remove leading space and endline
@@ -60,7 +60,7 @@ def default_interpreter(Read, Write):
 					print(f"Reading from {file_name}")
 					
 					indent_level = Read.indent_count
-					nextRead = Filereader(read_file, Write, indent = '    ', indent_base = indent_level)
+					nextRead = Filereader(read_file, Write, indent_base = indent_level)
 
 					#Start default interpreter
 					default_interpreter(nextRead, Write)
@@ -176,6 +176,9 @@ def default_interpreter(Read, Write):
 						elif token == '@':
 							Read.add_container_tag(tag)
 				
+				if line[0].isspace():
+					line.pop_to(1)
+				
 				#parser
 				if custom_tag in CUSTOM.TAGS:
 					#feels tacky
@@ -187,8 +190,8 @@ def default_interpreter(Read, Write):
 					#change parser
 					parser = asis
 					
-				elif tag in {"pre"}:
-					parser = pre
+				#elif tag in {"pre"}:
+				#	parser = pre
 					
 				if parser:
 					if brackets: print("the interpreter can't handle bracketed content")

@@ -13,6 +13,7 @@ class Filereader(File):
 		#indentation for file
 		self.indent_base = indent_base
 		self.indent_count = indent_base
+		self.prev_indent_count = None
 		self.line_number = 0
 		
 		#{dict with indentation as key: [list of tags]}
@@ -38,9 +39,8 @@ class Filereader(File):
 		return Line(line)
 	
 	def indent_change(self, line):
-		indent_change = (len(line)-len(line.lstrip())) // len(self.indent) - self.indent_count
-		self.indent_count += indent_change
-		return indent_change
+		self.prev_indent_count = self.indent_count
+		self.indent_count = (len(line)-len(line.lstrip())) // len(self.indent)
 	
 	def add_tag(self, tag):
 		self.tabclosing_tags.setdefault(self.indent_count, []).append(f"</{tag}>")
@@ -63,7 +63,9 @@ class Filereader(File):
 				self.writefile.newline()
 				
 	def pop_inline(self):
-		tags = self.tabclosing_tags.pop(self.indent_count, []) #
+		#Uses indent_change to get back to the previous line's indentation to pop off
+		#the previous line's tags
+		tags = self.tabclosing_tags.pop(self.prev_indent_count, []) #
 		for tag in reversed(tags):
 			self.writefile.write(tag)
 	

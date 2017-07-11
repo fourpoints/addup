@@ -8,6 +8,21 @@ TAGS = {
 				}
 		},
 	
+	"heading":
+		{
+			"html5tag"    : 'h3'
+		},
+	
+	"fet":
+		{
+			"html5tag"    : 'b'
+		},
+	
+	"nl":
+		{
+			"html5tag"    : 'br'
+		},
+	
 	"Q":
 		{
 			"html5tag"    : 'div',
