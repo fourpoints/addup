@@ -1,63 +1,144 @@
-# Markplus
-Interpreter from the whitespace dependent markup language **markplus** to HTML.
-
-### How to
-In `markup+.py`, change `file_to_read` to your markplus-file, and change `file_to_write` to choose a name for your HTML-file.
+### Setup
+In `markup+.py`, change `file_to_read` to your +Markup-file, and change `file_to_write` to choose a name for your HTML-file.
 If you're using spaces instead of tabs, change the `indent` input in the `Filereader` constructor. (Note: this will currently not work for `+("file.extension")`-loaded files).
 To add a new customized tag, include an entry in `custom_tags.py`.
 
-### Example
+### Syntax
+
+#### Example file
 ```
 <!doctype html>
-+html
-  +head
-    +title sample page
-    +meta(charset = "utf-8")
-    
-  +body
-    //this is a one line comment
-    +div(id = "wrapper")
-      +h3 this is a title
-      +a(href = "example.com")(this is a link)
-      this is just text +b(and this is bold text)
-      \ is an \+b(escape char)
-      [[is+an+unformatted+line]]
-      +ul
-        +li item 1
-        +li item 2
-      @div
-      wraps around the rest of the block
-    the block ends above this line
+@html
++head
+  +title Ipsum lorem
+  +meta(charset = "utf-8")
+
++body //comment
+  +Section
+    +h3 heading
+    sample text sample text sample
+    sample text sample +b(text sample
+    text) sample text +br
+    +ul
+     +li +a(href = "example.com")(link name)
+     +li +a(href = "example.com")(link name)
 ```
 
 ```html
 <!doctype html>
 <html>
-  <head>
-    <title>sample page</title>
-    <meta charset="utf-8" />
-  </head>
-  <body>
-    <!--this is a one line comment-->
-    <div id="wrapper">
-      <h3>this is a title</h3>
-      <a href="example.com">this is a link</a>
-      this is just text <b>and this is bold text</b>
-       is an +b(escape char)
-      is+an+unformatted+line
-      <ul>
-        <li>item 1</li>
-        <li>item 2</li>
-      </ul>
-      <div>
-      wraps around the rest of the block
-      </div>
-    the block ends above this line
-    </div>
-  </body>
+<head>
+  <title>Ipsum lorem</title>
+  <meta charset="utf-8" />
+</head>
+<body><!--comment-->
+  <div class="section">
+    <h3>heading</h3>
+    sample text sample text sample
+    sample text sample <b>text sample
+    text</b> sample text <br/>
+    <ul>
+      <li><a href="example.com">link name</a></li>
+      <li><a href="example.com">link name</a></li>
+    </ul>
+</body>
 </html>
 ```
 
-### Additional features
-- Define custom tags. Instead of typing `+div(class="head")`, you may define a `+Head`-tag in `custom_tags.py`.
-- Read from multiple files. By writing `+("file.extension")` the interpreter will start reading from another file, allowing you to combine multiple files into a single HTML-file.
+#### +tag
+`+tag` creates opening and closing tags around the indented block. Note that `+ tag` will be ignored by the interpreter.
+```
++div text
+  text
+text
+```
+```html
+<div>text
+  text
+<div>
+text
+```
+
+#### @tag (may be removed)
+`@tag` creates opening and closing tags around the rest of the block on the same level.
+```
++div
+  text
+  @div text
+  text
+```
+```html
+<div>
+  text
+  <div> text
+  text
+  </div>
+</div> 
+```
+
+#### //comment
+`//comment` creates an inline comment. (Multi-line comments are not (yet?) supported.)
+```
+//this is a comment
+```
+```html
+<!--this is a comment-->
+```
+
+#### \escape_char
+`\escape_char` escapes the next character
+```
+text \+div \//
+```
+```html
+tetxt +div //
+```
+
+#### [[escape line]]
+`[[escape line]]` escapes the content of the brackets. Will only work on a single line.
+```
+text [[+div //]]
+```
+```html
+text +div //
+```
+
+#### +style and +script will escape all +Markup-syntax
+So you don't have to worry about your JavaScript-comments becoming HTML-styled.
+
+#### +("file.extension")
+`+("file.extension")` will start reading from another file, allowing you to easily combine multiple files into a single output file.  
+`color.css`:
+```css
+#red {color: red}
+```
+```
++style
+  +("color.css")
+```
+```
+<style>
+  #red {color: red}
+</style>
+```
+
+#### custom tags
+Make more meaningful names to your tags by making customized names with attributes of your choice. Why not make a `+Bold` tag, instead of the less meaningful `b`, or a `Section` tags if you find yourself using many `div`s with a `section` class?  
+It is recommended that you use capital letters for custom tags, to easily distinguish them from HTML5 tags.
+`custom_tags.py`:
+```python
+"Bold":
+	{
+  	"html5tag" : "b"
+  },
+  
+"Section":
+	{
+		"html5tag"    : "div",
+		"attributes"  :
+			{
+				"class" : "section",
+       	"id"    : "red"
+			}
+	},
+```
