@@ -1,5 +1,5 @@
 ### Setup
-In `markup+.py`, change `file_to_read` to your +Markup-file, and change `file_to_write` to choose a name for your HTML-file.
+In `markup+.py`, change `file_to_read` to your addup-file, and change `file_to_write` to choose a name for your HTML-file.
 If you're using spaces instead of tabs, change the `indent` input in the `Filereader` constructor. (Note: this will currently not work for `+("file.extension")`-loaded files).
 To add a new customized tag, include an entry in `custom_tags.py`.
 
