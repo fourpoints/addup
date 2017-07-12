@@ -128,17 +128,17 @@ It is recommended that you use capital letters for custom tags, to easily distin
 `custom_tags.py`:
 ```python
 "Bold":
-	{
-  	"html5tag" : "b"
+  {
+    "html5tag" : "b"
   },
   
 "Section":
-	{
-		"html5tag"    : "div",
-		"attributes"  :
-			{
-				"class" : "section",
-       	"id"    : "red"
-			}
-	},
+  {
+    "html5tag"    : "div",
+    "attributes"  :
+    {
+      "class" : "section",
+      "id"    : "red"
+    }
+  },
 ```
