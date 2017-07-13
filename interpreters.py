@@ -238,7 +238,7 @@ def default_interpreter(Read, Write):
 def asis(Read, Write):
 	"""Parses block as-is"""
 	
-	start_indentation = Read.indent_count + Write.tag_in_line
+	start_indentation = Read.indent_count
 	
 	#The rest of the line should be printed as it is
 	line = Read.readline()
@@ -250,7 +250,7 @@ def asis(Read, Write):
 		if line.isspace(): continue #No need to check if line == ''; every line has at least \n (except last)
 			
 		indentation = (len(line)-len(line.lstrip())) // len(Read.indent)
-		if indentation < start_indentation:
+		if indentation <= start_indentation:
 			break
 		
 		#new save-point

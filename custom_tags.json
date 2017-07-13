@@ -1,0 +1,75 @@
+{
+	"Section":
+	[
+		{
+			"html5tag"    : "div",
+			"attributes"  :
+			{
+				"class" : "section"
+			}
+		}
+	],
+	
+	"heading":
+	[
+		{
+			"html5tag"    : "h3"
+		}
+	],
+
+	"bold":
+	[
+		{
+			"html5tag"    : "b"
+		}
+	],
+	
+	"italic":
+	[
+		{
+			"html5tag"    : "i"
+		}
+	],
+	
+	"newline":
+	[
+		{
+			"html5tag"    : "br"
+		}
+	],
+	
+	"Q":
+	[
+		{
+			"html5tag"    : "div",
+			"attributes"  :
+			{
+				"class" : "sigma pi"
+			}
+		}
+	],
+	
+	"Math":
+	[	
+		{
+			"html5tag"    : "script",
+			"attributes"  :
+			{
+				"type" : "math/tex"
+			},
+			"parser" : "asis"
+		}
+	],
+	
+	"MathJax":
+	[
+		{
+			"html5tag"    : "script",
+			"attributes"  :
+			{
+				"type" : "math/tex"
+			},
+			"parser" : "asis"
+		}
+	]
+}

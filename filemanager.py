@@ -30,6 +30,7 @@ class Filereader(File):
 		return self
 	
 	def readline(self):
+		self.line_number += 1
 		return Line(self.file.readline())
 	
 	def peek_next(self):
