@@ -1,7 +1,7 @@
 ### Setup
-In `markup+.py`, change `file_to_read` to your addup-file, and change `file_to_write` to choose a name for your HTML-file.
-If you're using spaces instead of tabs, change the `indent` input in the `Filereader` constructor. (Note: this will currently not work for `+("file.extension")`-loaded files).
-To add a new customized tag, include an entry in `custom_tags.py`.
+- In `markup+.py`, change `file_to_read` to your addup-file, and change `file_to_write` to choose a name for your HTML-file.  
+- If you're using spaces instead of tabs, change the `indent` input in the `Filereader` constructor. (Note: this will currently not work for `+("file.extension")`-loaded files).  
+- To add a new customized tag, include an entry in `custom_tags.json`.
 
 ### Syntax
 
@@ -23,7 +23,6 @@ To add a new customized tag, include an entry in `custom_tags.py`.
      +li +a(href = "example.com")(link name)
      +li +a(href = "example.com")(link name)
 ```
-
 ```html
 <!doctype html>
 <html>
@@ -46,7 +45,7 @@ To add a new customized tag, include an entry in `custom_tags.py`.
 ```
 
 #### +tag
-`+tag` creates opening and closing tags around the indented block. Note that `+ tag` will be ignored by the interpreter.
+`+tag` creates opening and closing tags around the indented block. Note that `+ tag` will be ignored by the interpreter. The `tag` must be followed by a space/newline ("` `", "`\n`") or an opening bracket ("`(`").
 ```
 +div text
   text
@@ -108,14 +107,16 @@ So you don't have to worry about your JavaScript-comments becoming HTML-styled.
 
 #### +("file.extension")
 `+("file.extension")` will start reading from another file, allowing you to easily combine multiple files into a single output file.  
-`color.css`:
+CSS file:
 ```css
 #red {color: red}
 ```
+addup file:
 ```
 +style
   +("color.css")
 ```
+HTML output:
 ```
 <style>
   #red {color: red}
@@ -124,15 +125,19 @@ So you don't have to worry about your JavaScript-comments becoming HTML-styled.
 
 #### custom tags
 Make more meaningful names to your tags by making customized names with attributes of your choice. Why not make a `+Bold` tag, instead of the less meaningful `b`, or a `Section` tags if you find yourself using many `div`s with a `section` class?  
-It is recommended that you use capital letters for custom tags, to easily distinguish them from HTML5 tags.
-`custom_tags.py`:
-```python
+It is recommended that you use capital letters for custom tags, to easily distinguish them from HTML5 tags.  
+custom tags can only replace a single HTML-tag, so you still need two tags for `<pre><code>`.  
+`custom_tags.json`:
+```json
 "Bold":
+[
   {
     "html5tag" : "b"
-  },
+  }
+],
   
 "Section":
+[
   {
     "html5tag"    : "div",
     "attributes"  :
@@ -140,5 +145,6 @@ It is recommended that you use capital letters for custom tags, to easily distin
       "class" : "section",
       "id"    : "red"
     }
-  },
+  }
+],
 ```
