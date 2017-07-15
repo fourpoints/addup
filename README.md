@@ -10,36 +10,36 @@
 <!doctype html>
 @html
 +head
-  +title Ipsum lorem
-  +meta(charset = "utf-8")
+	+title Ipsum lorem
+	+meta(charset = "utf-8")
 
 +body //comment
-  +Section
-    +h3 heading
-    sample text sample text sample
-    sample text sample +b(text sample
-    text) sample text +br
-    +ul
-     +li +a(href = "example.com")(link name)
-     +li +a(href = "example.com")(link name)
+	+Section
+		+h3 heading
+		sample text sample text sample
+		sample text sample +b(text sample
+		text) sample text +br
+		+ul
+			+li +a(href = "example.com")(link name)
+			+li +a(href = "example.com")(link name)
 ```
 ```html
 <!doctype html>
 <html>
 <head>
-  <title>Ipsum lorem</title>
-  <meta charset="utf-8" />
+	<title>Ipsum lorem</title>
+	<meta charset="utf-8" />
 </head>
 <body><!--comment-->
-  <div class="section">
-    <h3>heading</h3>
-    sample text sample text sample
-    sample text sample <b>text sample
-    text</b> sample text <br/>
-    <ul>
-      <li><a href="example.com">link name</a></li>
-      <li><a href="example.com">link name</a></li>
-    </ul>
+	<div class="section">
+		<h3>heading</h3>
+		sample text sample text sample
+		sample text sample <b>text sample
+		text</b> sample text <br/>
+		<ul>
+			<li><a href="example.com">link name</a></li>
+			<li><a href="example.com">link name</a></li>
+		</ul>
 </body>
 </html>
 ```
@@ -48,12 +48,12 @@
 `+tag` creates opening and closing tags around the indented block. Note that `+ tag` will be ignored by the interpreter. The `tag` must be followed by a space/newline ("` `", "`\n`") or an opening bracket ("`(`").
 ```
 +div text
-  text
+	text
 text
 ```
 ```html
 <div>text
-  text
+	text
 <div>
 text
 ```
@@ -62,16 +62,16 @@ text
 `@tag` creates opening and closing tags around the rest of the block on the same level.
 ```
 +div
-  text
-  @div text
-  text
+	text
+	@div text
+	text
 ```
 ```html
 <div>
-  text
-  <div> text
-  text
-  </div>
+	text
+	<div> text
+	text
+	</div>
 </div> 
 ```
 
@@ -114,12 +114,12 @@ CSS file:
 addup file:
 ```
 +style
-  +("color.css")
+	+("color.css")
 ```
 HTML output:
 ```
 <style>
-  #red {color: red}
+	#red {color: red}
 </style>
 ```
 
@@ -131,20 +131,26 @@ custom tags can only replace a single HTML-tag, so you still need two tags for `
 ```json
 "Bold":
 [
-  {
-    "html5tag" : "b"
-  }
+	{
+		"html5tag" : "b"
+	}
 ],
   
 "Section":
 [
-  {
-    "html5tag"    : "div",
-    "attributes"  :
-    {
-      "class" : "section",
-      "id"    : "red"
-    }
-  }
+	{
+		"html5tag"    : "div",
+		"attributes"  :
+		{
+			"class" : "section",
+			"id"    : "red"
+		}
+	}
 ],
 ```
+
+### Conventions
+- tabs > spaces  
+- underscore_case  
+- Capitalized custom tags  
+- blue > red
