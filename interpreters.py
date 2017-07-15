@@ -176,7 +176,8 @@ def default_interpreter(Read, Write):
 						elif token == '@':
 							Read.add_container_tag(tag)
 				
-				if line[0].isspace():
+				#check if line is empty or space
+				if line.string and line[0].isspace():
 					line.pop_to(1)
 				
 				#parser
