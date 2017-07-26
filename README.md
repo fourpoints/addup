@@ -1,5 +1,5 @@
 ### Setup
-- In `markup+.py`, change `file_to_read` to your addup-file, and change `file_to_write` to choose a name for your HTML-file.  
+- In `addup.py`, change `file_to_read` to your addup-file, and change `file_to_write` to choose a name for your HTML-file.  
 - If you're using spaces instead of tabs, change the `indent` input in the `Filereader` constructor. (Note: this will currently not work for `+("file.extension")`-loaded files).  
 - To add a new customized tag, include an entry in `custom_tags.json`.
 
@@ -7,7 +7,7 @@
 
 #### Example file
 ```
-<!doctype html>
++!doctype(html)
 @html
 +head
 	+title Ipsum lorem
@@ -28,14 +28,14 @@
 <html>
 <head>
 	<title>Ipsum lorem</title>
-	<meta charset="utf-8" />
+	<meta charset="utf-8">
 </head>
 <body><!--comment-->
 	<div class="section">
 		<h3>heading</h3>
 		sample text sample text sample
 		sample text sample <b>text sample
-		text</b> sample text <br/>
+		text</b> sample text <br>
 		<ul>
 			<li><a href="example.com">link name</a></li>
 			<li><a href="example.com">link name</a></li>
@@ -58,8 +58,8 @@ text
 text
 ```
 
-#### @tag (may be removed)
-`@tag` creates opening and closing tags around the rest of the block on the same level.
+#### @tag
+`@tag` creates opening and closing tags around the rest of the block on the same level. This is useful for the html-tag, but is generally not recommended; use `+` whenever possible.
 ```
 +div
 	text
@@ -76,7 +76,7 @@ text
 ```
 
 #### //comment
-`//comment` creates an inline comment. (Multi-line comments are not (yet?) supported.)
+`//comment` creates an inline comment. (Multi-line comments are not supported.)
 ```
 //this is a comment
 ```
@@ -93,64 +93,61 @@ text \+div \//
 tetxt +div //
 ```
 
-#### [[escape line]]
-`[[escape line]]` escapes the content of the brackets. Will only work on a single line.
-```
-text [[+div //]]
-```
-```html
-text +div //
-```
-
-#### +style and +script will escape all +Markup-syntax
+#### +style and +script will escape all addup-syntax
 So you don't have to worry about your JavaScript-comments becoming HTML-styled.
 
 #### +("file.extension")
 `+("file.extension")` will start reading from another file, allowing you to easily combine multiple files into a single output file.  
-CSS file:
-```css
-#red {color: red}
+`file.txt`:
+```txt
+ipsum lorem
 ```
 addup file:
 ```
-+style
-	+("color.css")
++div
+	+("file.txt")
 ```
 HTML output:
 ```
-<style>
-	#red {color: red}
-</style>
+<div>
+	ipsum lorem
+</div>
 ```
 
 #### custom tags
-Make more meaningful names to your tags by making customized names with attributes of your choice. Why not make a `+Bold` tag, instead of the less meaningful `b`, or a `Section` tags if you find yourself using many `div`s with a `section` class?  
-It is recommended that you use capital letters for custom tags, to easily distinguish them from HTML5 tags.  
-custom tags can only replace a single HTML-tag, so you still need two tags for `<pre><code>`.  
+Make more meaningful names to your tags by making customized names with attributes of your choice. Why not make a `+bold` tag, instead of the less meaningful `b`, or a `section` tags if you find yourself using many `div`s with a `section` class?  
+There is no need to make these distinguishable from standard HTML-tags. The simpler the better.  
+Custom tags must be defined using lower case letters in the json-file, but tags in your addup-file are case-insensitive.
 `custom_tags.json`:
 ```json
-"Bold":
-[
-	{
-		"html5tag" : "b"
-	}
-],
-  
-"Section":
-[
-	{
-		"html5tag"    : "div",
-		"attributes"  :
+"italic":
+{
+	"lang" : "HTML",
+	"tags" :
+	[
 		{
-			"class" : "section",
-			"id"    : "red"
+			"html5tag"    : "i"
 		}
-	}
-],
+	]
+},
+  
+"section":
+{
+	"lang" : "HTML",
+	"tags" :
+	[
+		{
+			"html5tag"  : "div"
+			"attributes :
+			{
+				class : "section"
+			}
+		}
+	]
+},
 ```
 
 ### Conventions
 - tabs > spaces  
-- underscore_case  
-- Capitalized custom tags  
-- blue > red
+- underscore\_case > camelCase  
+- green > blue
