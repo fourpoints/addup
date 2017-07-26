@@ -1,7 +1,7 @@
 ### Planned updates
 - [ ] Support for the `<pre>`-tag.  
 - [x] Convert `+h3 title` to `<h3>title</h3>` instead of (current) `<h3> title</h3>`.  
-- [ ] Remove whitespace between tags on different lines `</tag><!-- --><tag>`.  
+- [x] ~~Remove whitespace between tags on different lines `</tag><!-- --><tag>`.~~ Unnecessary in HTML5
 - [ ] Fix indenting in loaded files.
 
 ### Possible updates
