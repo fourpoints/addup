@@ -120,6 +120,7 @@ There is no need to make these distinguishable from standard HTML-tags. The simp
 Custom tags must be defined using lower case letters in the json-file, but tags in your addup-file are case-insensitive.
 `custom_tags.json`:
 ```json
+{
 "italic":
 {
 	"lang" : "HTML",
@@ -144,7 +145,8 @@ Custom tags must be defined using lower case letters in the json-file, but tags 
 			}
 		}
 	]
-},
+}
+}
 ```
 
 ### Conventions
