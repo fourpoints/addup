@@ -14,7 +14,10 @@ def getlang(tag):
 			return getattr(langs, "HTML")
 
 	elif tag in CUSTOM:
-			return getattr(langs, "Custom")
+		return getattr(langs, "Custom")
+		
+	elif tag == 'eqn':
+		return getattr(langs, "Jax")
 	
 	else:
 		print(f"{tag} is not a tag")

@@ -46,8 +46,10 @@ class Filereader(File):
 		self.indent_count = 0
 		self.prev_indent_count = None
 		self.line_number = 0
-		self.line = ''
 		self.offset = 0 #FIX
+		self.line = ''
+		#fill self.line
+		self.readline()
 	
 	def readline(self):
 		while self.line.isspace() or self.line == '':
@@ -71,7 +73,7 @@ class Filereader(File):
 	def indent_change(self):
 		self.prev_indent_count = self.indent_count
 		print(self.indent)
-		self.indent_count = (len(self.line)-len(self.line.lstrip())) // len(self.indent)
+		self.indent_count = (len(self.line)-len(self.line.lstrip())) // len(self.indent) + self.offset
 	
 	def match(self, *tokens, line = None):
 		if line is None: #HACKY
@@ -122,18 +124,23 @@ class Filereader(File):
 				has_bracketed_content = True
 		
 		if has_attributes:
+			attribute_string = ''
 			#looks for '")'; this is safer than looking for ')'
 			end_index, end = self.match(')')
+			attribute_string += self.popto(end_index)
 			#Check if end is found and make sure that we didn't find the parenthesis inside a value
-			while not end and (self.line.count('"')%2 == 0):
-				self.readline()
+			while not end or (attribute_string.count('"')%2 == 1):
+				attribute_string += self.popto(len(')'))
+				if self.line == '':
+					self.readline()
 				end_index, end = self.match(')')
+				attribute_string += self.popto(end_index)
 
-			attribute_string = self.popto(end_index)
 			self.popto(len(end))
 			
 			if self.line and self.line[0] == '(' and not selfclosing:
 				has_bracketed_content = True
+				self.popto(1)
 
 			#attributes are separated by a comma, may break if there's a hyperlink with a ','
 			attribute_list = attribute_string.split(',')
