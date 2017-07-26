@@ -138,9 +138,9 @@ Custom tags must be defined using lower case letters in the json-file, but tags 
 	[
 		{
 			"html5tag"  : "div"
-			"attributes :
+			"attributes" :
 			{
-				class : "section"
+				"class" : "section"
 			}
 		}
 	]
