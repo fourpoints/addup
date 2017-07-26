@@ -1,75 +1,134 @@
 {
-	"Section":
-	[
-		{
-			"html5tag"    : "div",
-			"attributes"  :
+	"section":
+	{
+		"lang" : "HTML",
+		"tags" :
+		[	
 			{
-				"class" : "section"
+				"html5tag"    : "div",
+				"attributes"  :
+				{
+					"class"  : "section",
+					"style" : "color: blue;"
+				}
 			}
-		}
-	],
+		]
+	},
 	
 	"heading":
-	[
-		{
-			"html5tag"    : "h3"
-		}
-	],
+	{
+		"lang" : "HTML",
+		"tags" :
+		[	
+			{
+				"html5tag"    : "h3"
+			}
+		]
+	},
 
 	"bold":
-	[
-		{
-			"html5tag"    : "b"
-		}
-	],
+	{
+		"lang" : "HTML",
+		"tags" :
+		[	
+			{
+				"html5tag"    : "b"
+			}
+		]
+	},
+	
+	"python":
+	{
+		"lang" : "Python",
+		"offset" : "True",
+		"tags" :
+		[	
+			{
+				"html5tag"    : "pre",
+				"attributes"  :
+				{
+					"class"  : "Python"
+				}
+			},
+			{
+				"html5tag"    : "code",
+				"attributes"  :
+				{
+					"class"  : "me llamo"
+				}
+			}
+		]
+	},
 	
 	"italic":
-	[
-		{
-			"html5tag"    : "i"
-		}
-	],
+	{
+		"lang" : "HTML",
+		"tags" :
+		[	
+			{
+				"html5tag"    : "i"
+			}
+		]
+	},
 	
 	"newline":
-	[
-		{
-			"html5tag"    : "br"
-		}
-	],
-	
-	"Q":
-	[
-		{
-			"html5tag"    : "div",
-			"attributes"  :
+	{
+		"lang" : "HTML",
+		"tags" :
+		[	
 			{
-				"class" : "sigma pi"
+				"html5tag"    : "br"
 			}
-		}
-	],
+		]
+	},
 	
-	"Math":
-	[	
-		{
-			"html5tag"    : "script",
-			"attributes"  :
+	"content":
+	{
+		"lang" : "HTML",
+		"tags" :
+		[	
 			{
-				"type" : "math/tex"
-			},
-			"parser" : "asis"
-		}
-	],
+				"html5tag"    : "div",
+				"attributes"  :
+				{
+					"class"  : "content"
+				}
+			}
+		]
+	},
 	
-	"MathJax":
-	[
-		{
-			"html5tag"    : "script",
-			"attributes"  :
+	"box":
+	{
+		"lang" : "HTML",
+		"tags" :
+		[	
 			{
-				"type" : "math/tex"
-			},
-			"parser" : "asis"
-		}
-	]
+				"html5tag"    : "div",
+				"attributes"  :
+				{
+					"class"  : "box"
+				}
+			}
+		]
+	},
+	
+	"math":
+	{
+		"lang" : "HTML",
+		"tags" :
+		[	
+			{
+				"html5tag"    : "script",
+				"attributes"  :
+				{
+					"type"  : "math/tex"
+				}
+			}
+		]
+	},
+	
+	"eqn":
+	{
+		"lang" : "Jax"
+	}
 }

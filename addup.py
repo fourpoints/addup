@@ -1,32 +1,30 @@
-"""
-Markplus/Kwik-E-Mark/QuickMarkup
-[c] 47-06-16
-"""
+""" +^ [c] :: 47-06-16 | 47-07-24 """
 
 ## Imports
 
-from filemanager import Filereader, Filewriter, Line
-from interpreters import default_interpreter, asis, pre
+from langs import *
+from blocks import *
+from filemanager import *
 
 TX = "program is running fine so far"
 
 ## Files to read/write
 
-file_to_read  = "foo.m+"
+file_to_read  = "foo.au"
 file_to_write = "foo.html"
 
 with open(file_to_read, mode='r') as read_file, open(file_to_write, mode='w') as write_file:
-	#start
+
 	print("Translation started")
 	
-	Write = Filewriter(write_file)
-	Read = Filereader(read_file, Write, indent = '\t')
+	#Wrap files in classes
+	OFile = Filewriter(write_file)
+	IFile = Filereader(read_file)
 	
-	#HTML5
-	#Write.write("<!DOCTYPE html>\n")
+	#Define block type
+	lang = Blank(I = IFile, O = OFile, block = wrapping_block, tag = None, attributes = {})
 	
 	#Start default interpreter
-	default_interpreter(Read, Write)
+	lang.block()
 	
-	#complete
 	input("Translation completed")
