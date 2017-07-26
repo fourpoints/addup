@@ -1,3 +1,4 @@
 theme: jekyll-theme-minimal
 title: addup
 description: addup is a whitespace sensitive markup language with an HTML interpreter.
+show_downloads: true
