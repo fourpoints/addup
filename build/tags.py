@@ -14,12 +14,13 @@ def getlang(tag):
 			return getattr(langs, "HTML")
 
 	elif tag in CUSTOM:
-		return getattr(langs, "Custom")
-		
-	elif tag == 'eqn':
-		return getattr(langs, "Jax")
+		lang = CUSTOM[tag].get("lang")
+		if lang == "HTML":
+			lang = "CustomHTML"
+		return getattr(langs, lang)
 	
 	else:
+		return None
 		print(f"{tag} is not a tag")
 		
 def is_selfclosing(tag):
@@ -34,17 +35,14 @@ def is_selfclosing(tag):
 with open("custom_tags.json") as custom_tags:
 	CUSTOM = json.load(custom_tags)
 
-def tag(tag):
-	return CUSTOM[tag][0].get("html5tag")
+def get_tags_and_attributes_from_json(tag):
+	return CUSTOM[tag].get("tags").copy()
 
-def attributes(tag):
-	try:
-		return CUSTOM[tag][0].get("attributes").copy()
-	except AttributeError:
+def has_offset(tag):
+	if CUSTOM[tag].get("offset") == "True":
+		return True
+	else:
 		return False
-
-def parser(tag):
-	return CUSTOM[tag][0].get("parser")
 
 ## HTML5
 

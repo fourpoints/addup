@@ -1,3 +1,10 @@
+"""
+Blocks
+
+TODO:
+* Avoid newline/indent on certain tags, like Blank/Pre: self.__class__.__name__ != "Pre" (necessary?)
+"""
+
 ## +block
 def indented_block(self):
 	print(f"Indent-dependent {self.tag} block started")
@@ -14,7 +21,7 @@ def indented_block(self):
 		loop_line = self.I.line_number
 		
 		index, token = self.next_token()
-		if not token:
+		if index > 0:
 			self.O.indents(count = self.I.indent_count)
 		self.O.write(self.I.popto(index))
 		self.I.popto(len(token))
@@ -43,8 +50,6 @@ def indented_block(self):
 	
 	if self.offset:
 		self.O.offset += block_indent
-	
-	print(f"Indent-dependent {self.tag} block was successfully printed")
 
 ## @wrapper:
 def wrapping_block(self):
@@ -62,7 +67,7 @@ def wrapping_block(self):
 		loop_line = self.I.line_number
 		
 		index, token = self.next_token()
-		if not token:
+		if not token and index:
 			self.O.indents(count = self.I.indent_count)
 		self.O.write(self.I.popto(index))
 		self.I.popto(len(token))
@@ -84,15 +89,13 @@ def wrapping_block(self):
 				self.O.newline()
 	
 	#Closing block
-	if start_O_line != self.O.line_number:
+	if start_O_line != self.O.line_number and self.__class__.__name__ != "Blank":
 		self.O.newline()
 		self.O.indents(count = block_indent)
 	self.closing_tag()
 	
 	if self.offset:
 		self.O.offset += block_indent
-	
-	print(f"Wrapping {self.tag} block was successfully printed")
 
 ## +block()
 def bracketed_block(self):
@@ -153,9 +156,7 @@ def bracketed_block(self):
 	if self.offset:
 		self.O.offset += block_indent
 	
-	print(f"Bracketed {self.tag} block was successfully printed")
-	
 #Selfclosing pseudo-block
 def selfclosing_block(self):
+	print(f"Selfclosing {self.tag} tag started")
 	self.opening_tag()
-	print(f"Selfclosing {self.tag} tag was successfully printed")

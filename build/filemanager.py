@@ -13,7 +13,7 @@ class File:
 class Filewriter(File):
 	def __init__(self, file, indent = INDENT):
 		super().__init__(file, indent)
-		self.flipflop = '\n' #Flip between \n and \t
+		self.flipflop = '\n' #newline->indent->loop (assumes text is written in between)
 		self.indent_tag_in_line = False
 		self.empty_line = True
 		self.line_number = 0
@@ -21,9 +21,7 @@ class Filewriter(File):
 		self.indent_count = 0 #FIX
 		
 	def write(self, string):
-		#if self.empty_line and string:
-		#	self.indents(count = self.indent_count)
-		#	self.empty_line = False
+		self.empty_line = False
 		self.file.write(string)
 		
 	def newline(self):
@@ -40,13 +38,13 @@ class Filewriter(File):
 			self.file.write(self.indent*(count+self.offset))
 			
 class Filereader(File):
-	def __init__(self, file, indent = INDENT):
+	def __init__(self, file, indent = INDENT, offset = 0):
 		super().__init__(file, indent)
 		#indentation for file
 		self.indent_count = 0
 		self.prev_indent_count = None
 		self.line_number = 0
-		self.offset = 0 #FIX
+		self.offset = offset
 		self.line = ''
 		#fill self.line
 		self.readline()
@@ -72,7 +70,6 @@ class Filereader(File):
 	
 	def indent_change(self):
 		self.prev_indent_count = self.indent_count
-		print(self.indent)
 		self.indent_count = (len(self.line)-len(self.line.lstrip())) // len(self.indent) + self.offset
 	
 	def match(self, *tokens, line = None):

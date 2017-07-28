@@ -10,8 +10,8 @@ TX = "program is running fine so far"
 
 ## Files to read/write
 
-file_to_read  = "foo.au"
-file_to_write = "foo.html"
+file_to_read  = "Tutorial.au"
+file_to_write = "Tutorial.html"
 
 with open(file_to_read, mode='r') as read_file, open(file_to_write, mode='w') as write_file:
 
