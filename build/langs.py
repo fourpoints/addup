@@ -7,6 +7,7 @@ TODO:
 * Ignore closing tags for selfclosing tags in custom tags.
 * A tags .au-attributes are ignored in custom tags if the attribute doesn't in its custom tag.
 * Multiline attributes will use the indentation of the last attribute line.
+* Ignore space after attributes
 """
 
 from blocks import *
