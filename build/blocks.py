@@ -3,6 +3,7 @@ Blocks
 
 TODO:
 * Avoid newline/indent on certain tags, like Blank/Pre: self.__class__.__name__ != "Pre" (necessary?)
+* Fixed: () popped len(token) twice
 """
 
 ## +block
@@ -129,7 +130,6 @@ def bracketed_block(self):
 			level -= 1
 		else:
 			self.O.write(self.I.popto(index))
-			self.I.popto(len(token))
 			if token:
 				self.routine(token)
 			if self.I.line.isspace() or self.I.line == '':

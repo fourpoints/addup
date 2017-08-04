@@ -8,6 +8,7 @@ TODO:
 * A tags .au-attributes are ignored in custom tags if the attribute doesn't in its custom tag.
 * Multiline attributes will use the indentation of the last attribute line.
 * Ignore space after attributes
+* def __init__(**kwargs, attributes = {}) does not create new dict for new calls (?)
 """
 
 from blocks import *
@@ -109,6 +110,7 @@ class HTML(Lang):
 	def routine(self, token):
 		if token == '+' or token == '@':
 			tag, attributes, has_bracketed_content, selfclosing = self.I.tagattr()
+			print(tag)
 			
 			if tag == '': #empty tag
 				self.O.indents(count = self.I.indent_count)
@@ -350,22 +352,35 @@ class CSS(Lang):
 		self.O.write(f'</{self.tag}>')
 
 class Jax(Lang):
+	tokens = {'\\\\'}
 	def __init__(self, **kwa):
 		super().__init__(**kwa)
 		
 	def next_token(self, *args):
-		return self.I.match(*args)
+		return self.I.match(*Jax.tokens, *args)
+	
+	def routine(self, token):
+		self.O.indents(count = self.I.indent_count)
+		if token == '\\\\':
+			tag, attributes, has_bracketed_content, selfclosing = self.I.tagattr()
+			if "id" in attributes:
+				label = attributes["id"]
+				self.O.write(rf"\\\label{{{label}}}")
+			else:
+				self.O.write('\\\\')
 		
 	def opening_tag(self):
+		tags = get_tags_and_attributes_from_json(self.tag)
 		self.O.indents(count = self.I.indent_count)
-		self.O.write(r"\begin{equation}")
-		if self.attributes.get("id"):
+		self.O.write(rf"\begin{{{tags[0].get('jaxtag')}}}")
+		if "id" in self.attributes:
 			label = self.attributes["id"]
-			self.O.write(f"\\label{{{label}}}")
+			self.O.write(rf"\label{{{label}}}")
 	
 	def closing_tag(self):
+		tags = get_tags_and_attributes_from_json(self.tag)
 		self.O.indents(count = self.I.indent_count)
-		self.O.write(r"\end{equation}")
+		self.O.write(rf"\end{{{tags[0].get('jaxtag')}}}")
 
 class Python(Lang):
 	def __init__(self, **kwa):

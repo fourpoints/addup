@@ -78,6 +78,7 @@ class Filereader(File):
 		"""
 		Returns <first and longest token> in line
 		TODO: use <dict> with <len> as <key>
+			- Really? len() is O(1)
 		"""
 		sorted_tokens = sorted(tokens, key=len, reverse=True)
 		for index in range(len(line)):
