@@ -129,7 +129,6 @@ def bracketed_block(self):
 			self.O.write(')')
 			level -= 1
 		else:
-			self.O.write(self.I.popto(index))
 			if token:
 				self.routine(token)
 			if self.I.line.isspace() or self.I.line == '':
