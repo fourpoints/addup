@@ -13,7 +13,7 @@ TODO:
 from .blocks import *
 from .tags import *
 from .filemanager import *
-from functools import partial
+from functools import partial, update_wrapper
 
 class Lang:
 	def __init__(self, I, O, block, offset = 0, tag = None, attributes = {}):
@@ -25,7 +25,7 @@ class Lang:
 		self.tag = tag #this is a string
 		self.attributes = attributes #this is a dictionary
 
-		self.block = partial(block, self) #defined in blocks.py; defines a method for the class.
+		self.block = update_wrapper(partial(block, self), block) #defined in blocks.py; defines a method for the class.
 
 # Languages
 
@@ -251,7 +251,16 @@ class CustomNonHTML(Lang):
 		if (not self.O.empty_line) and self.offset:
 			self.O.newline()
 		self.O.indents(count = self.I.indent_count)
-		tags_and_attributes_from_json = get_tags_and_attributes_from_json(self.tag)
+		tags_and_attributes_from_json = None
+		if self.block.__name__ == "bracketed_block":
+			inline_tag = f"{self.tag}-inline"
+			try:
+				tags_and_attributes_from_json = get_tags_and_attributes_from_json(inline_tag)
+			except KeyError:
+				tags_and_attributes_from_json = get_tags_and_attributes_from_json(self.tag)
+		else:
+			tags_and_attributes_from_json = get_tags_and_attributes_from_json(self.tag)
+		print(self.I.line_number)
 		first_tag = tags_and_attributes_from_json.pop(0)
 		if "attributes" in first_tag:
 			self.O.write(f'<{first_tag.get("html5tag")}')

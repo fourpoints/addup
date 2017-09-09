@@ -30,7 +30,7 @@ except ValueError:
 	sys.exit()
 
 ## Files to read/write
-file_to_read  = f"{file_name}.au"
+file_to_read  = f"{file_name}.add"
 file_to_write = f"{file_name}.html"
 
 with open(file_to_read, mode='r') as read_file, open(file_to_write, mode='w') as write_file:

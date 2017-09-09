@@ -1,0 +1,196 @@
+{
+	"section":
+	{
+		"lang" : "HTML",
+		"tags" :
+		[
+			{
+				"html5tag"    : "div",
+				"attributes"  :
+				{
+					"class"  : "section",
+					"style" : "color: blue;"
+				}
+			}
+		]
+	},
+
+	"heading":
+	{
+		"lang" : "HTML",
+		"tags" :
+		[
+			{
+				"html5tag"    : "h3"
+			}
+		]
+	},
+
+	"question":
+	{
+		"lang" : "HTML",
+		"tags" :
+		[
+			{
+				"html5tag"    : "div",
+				"attributes"  :
+				{
+					"class"  : "question"
+				}
+			}
+		]
+	},
+
+	"answer":
+	{
+		"lang" : "HTML",
+		"tags" :
+		[
+			{
+				"html5tag"    : "div",
+				"attributes"  :
+				{
+					"class"  : "answer"
+				}
+			}
+		]
+	},
+
+	"bold":
+	{
+		"lang" : "HTML",
+		"tags" :
+		[
+			{
+				"html5tag"    : "b"
+			}
+		]
+	},
+
+	"python":
+	{
+		"lang" : "Python",
+		"offset" : "True",
+		"tags" :
+		[
+			{
+				"html5tag"    : "pre",
+				"attributes"  :
+				{
+					"class"  : "Python"
+				}
+			},
+			{
+				"html5tag"    : "code",
+				"attributes"  :
+				{
+					"class"  : "me llamo"
+				}
+			}
+		]
+	},
+
+	"italic":
+	{
+		"lang" : "HTML",
+		"tags" :
+		[
+			{
+				"html5tag"    : "i"
+			}
+		]
+	},
+
+	"newline":
+	{
+		"lang" : "HTML",
+		"tags" :
+		[
+			{
+				"html5tag"    : "br"
+			}
+		]
+	},
+
+	"content":
+	{
+		"lang" : "HTML",
+		"tags" :
+		[
+			{
+				"html5tag"    : "div",
+				"attributes"  :
+				{
+					"class"  : "content"
+				}
+			}
+		]
+	},
+
+	"box":
+	{
+		"lang" : "HTML",
+		"tags" :
+		[
+			{
+				"html5tag"    : "div",
+				"attributes"  :
+				{
+					"class"  : "box"
+				}
+			}
+		]
+	},
+
+	"math":
+	{
+		"lang" : "CustomNonHTML",
+		"tags" :
+		[
+			{
+				"html5tag"    : "script",
+				"attributes"  :
+				{
+					"type"  : "math/tex; mode=display"
+				}
+			}
+		]
+	},
+
+	"math-inline":
+	{
+		"lang" : "CustomNonHTML",
+		"tags" :
+		[
+			{
+				"html5tag"    : "script",
+				"attributes"  :
+				{
+					"type"  : "math/tex"
+				}
+			}
+		]
+	},
+
+	"eqn":
+	{
+		"lang" : "Jax",
+		"tags" :
+		[
+			{
+				"jaxtag"    : "equation"
+			}
+		]
+	},
+
+	"align":
+	{
+		"lang" : "Jax",
+		"tags" :
+		[
+			{
+				"jaxtag"    : "align"
+			}
+		]
+	}
+}

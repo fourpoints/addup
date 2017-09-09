@@ -5,6 +5,9 @@ INDENT = None
 class EOF(Exception):
 	""" End of file is reached """
 
+class EMPTY(Exception):
+	""" Empty line """
+
 class File:
 	def __init__(self, file, indent):
 		self.file = file
@@ -48,6 +51,7 @@ class Filereader(File):
 		self.line = ''
 		#fill self.line
 		self.readline()
+		self.empty_line = False
 
 	def readline(self):
 		while self.line.isspace() or self.line == '':
@@ -55,6 +59,8 @@ class Filereader(File):
 			self.line = self.file.readline()
 			if self.line == '':
 				raise EOF
+			if self.line.isspace():
+				self.empty_line = True
 
 		self.indent_change()
 		#self.write_file.indent_count = self.indent_count FIX
