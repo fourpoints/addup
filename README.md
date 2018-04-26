@@ -7,21 +7,21 @@
 
 #### Example file
 ```
-+!doctype(html)
-@html
-+head
-	+title Ipsum lorem
-	+meta(charset = "utf-8")
++doctype(html)
++html:
+	+head:
+		+title: Ipsum lorem
+		+meta(charset = "utf-8")
 
-+body //comment
-	+Section
-		+h3 heading
-		sample text sample text sample
-		sample text sample +b(text sample
-		text) sample text +br
-		+ul
-			+li +a(href = "example.com")(link name)
-			+li +a(href = "example.com")(link name)
+	+body: //comment
+		+Section:
+			+h3: heading
+			sample text sample text sample
+			sample text sample +b(text sample
+			text) sample text +br
+			+ul:
+				+li: +a(href = "example.com"):(link name)
+				+li: +a(href = "example.com"):(link name)
 ```
 ```html
 <!doctype html>
@@ -45,7 +45,7 @@
 ```
 
 #### +tag
-`+tag` creates opening and closing tags around the indented block. Note that `+ tag` will be ignored by the interpreter. The `tag` must be followed by a space/newline ("` `", "`\n`") or an opening bracket ("`(`").
+`+tag(attribute="value"):(content)` creates opening and closing tags around the indented block. Note that `+ tag` will be ignored by the interpreter. The `tag` must be followed by a space/newline ("` `", "`\n`") or an opening bracket ("`(`").
 ```
 +div text
 	text
@@ -56,23 +56,6 @@ text
 	text
 <div>
 text
-```
-
-#### @tag
-`@tag` creates opening and closing tags around the rest of the block on the same level. This is useful for the html-tag, but is generally not recommended; use `+` whenever possible.
-```
-+div
-	text
-	@div text
-	text
-```
-```html
-<div>
-	text
-	<div> text
-	text
-	</div>
-</div> 
 ```
 
 #### //comment
@@ -93,12 +76,19 @@ text \+div \//
 tetxt +div //
 ```
 
+#### Code
+`` `(lang) content` `` is highlighted with pygments
+
+#### Math
+`$(align) $` is shorthand for `\begin{align*} \end{align*}`
+
+
 #### +style and +script will escape all addup-syntax
 So you don't have to worry about your JavaScript-comments becoming HTML-styled.
 
-#### +("file.extension")
+<!--#### +("file.extension")
 `+("file.extension")` will start reading from another file, allowing you to easily combine multiple files into a single output file.  
-`file.txt`:
+file.txt:
 ```txt
 ipsum lorem
 ```
@@ -148,6 +138,7 @@ Custom tags must be defined using lower case letters in the json-file, but tags 
 }
 }
 ```
+-->
 
 ### Conventions
 - tabs > spaces  
