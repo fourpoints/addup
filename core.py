@@ -3,8 +3,7 @@
 File info
 """
 
-from pathlib import Path
-from .treebuilder import treebuilder
+from treebuilder import treebuilder
 import xml.etree.cElementTree as et
 
 def addup(**options):
@@ -87,5 +86,4 @@ def writer(file, tree, level):
 			file.write("\n" + level*"\t" + line)
 
 if __name__ == "__main__":
-	pass
-	#addup(infile = "tests/current.add", outfile = "tests/current.html", extension =[])
+	addup(infile = "tests/current.add", outfile = "tests/current.html", extension =[])
