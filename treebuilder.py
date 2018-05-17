@@ -1,5 +1,6 @@
 import re
 import xml.etree.cElementTree as ET
+import mumath
 import textwrap
 
 
@@ -169,9 +170,9 @@ class Addup(Node):
 			elif element_type == "code":
 				child = Code(tag = "template", token = tag)
 			elif element_type == "math":
-				child = Math(tag = "template", token = tag)
+				child = mumath.Math(tag = "math", token = tag)
 			elif element_type == "comment":
-				child = Comment()
+				child = Comment(tag = ET.Comment)
 
 			text = child.eat(text)
 			self.append(child)
@@ -271,12 +272,11 @@ class Code(Node):
 			lang = None
 
 		from pygments.lexers import get_lexer_by_name
+		# REMOVE? makes popping the key hard
 		lang = {
 			"SQL": "sql",
 			"python": "python3",
 			"js": "javascript",
-			"rust": "rust",
-			"cpp": "cpp",
 		}.get(lang, lang)
 
 		try:
@@ -354,6 +354,8 @@ class Math(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
+		self.token = extra.pop("token", None)
+
 	eat_arguments = eat_arguments
 
 	def eat(self, text):
@@ -400,11 +402,12 @@ class Comment(Node):
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	#REMOVE?
+	"""
 	@property
 	def tag(self): return self.node.tag
 	@tag.setter
 	def tag(self, tag): self.node.tag = tag
-
+	"""
 	def eat(self, text):
 		EOL = r'(?P<eol>$)'
 		EOF = r'(?P<eof>\Z)'
