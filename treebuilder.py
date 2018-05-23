@@ -1,5 +1,5 @@
 import re
-import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
 import mumath
 import textwrap
 
@@ -162,17 +162,23 @@ class Addup(Node):
 		while text:
 			tag = mo.group(element_type)
 
-			if element_type == "addup":
-				if tag in {"style", "script"}:
-					child = Raw(tag = tag)
-				else:
-					child = Addup(tag = tag)
-			elif element_type == "code":
-				child = Code(tag = "template", token = tag)
-			elif element_type == "math":
-				child = mumath.Math(tag = "math", token = tag)
-			elif element_type == "comment":
-				child = Comment(tag = ET.Comment)
+			def addup(tag):
+				return {
+					"style"  : Raw,
+					"script" : Raw,
+					"math"   : Math, # For mathjax, deprecated
+					"read"   : Read,
+					"now"    : Date,
+				}.get(tag, Addup)(tag = tag)
+			code = lambda tag: Code(tag = "template", token = tag)
+			math = lambda tag: mumath.Math(tag = "math", token = tag)
+			comment = lambda tag: Comment(tag = ET.Comment)
+
+			child = {
+				"code"    : code,
+				"math"    : math,
+				"comment" : comment,
+			}.get(element_type, addup)(tag)
 
 			text = child.eat(text)
 			self.append(child)
@@ -424,6 +430,54 @@ class Comment(Node):
 	def parse(self):
 		pass
 
+
+class Read(Node):
+	def __init__(self, tag, attrib={}, text="", tail="", **extra):
+		super().__init__(tag, attrib.copy(), text, tail, **extra)
+
+	eat_arguments = eat_arguments
+
+	def eat(self, text):
+		has_argument = re.compile(r"(?P<ARGUMENT>\()").match(text)
+		if has_argument:
+			text = self.eat_arguments(text)
+
+		try:
+			self.tag = self.attrib.pop("tag")
+		except KeyError:
+			self.tag = "div" #default
+
+		self.parse()
+
+		return text
+
+	def parse(self):
+		with open(self.attrib.pop("file"), mode='r') as ifile:
+			template_root = Addup("root")
+
+			template_root.text = ifile.read()
+			template_root.parse()
+
+			for child in template_root:
+				self.append(child)
+
+
+class Date(Node):
+	def __init__(self, tag, attrib={}, text="", tail="", **extra):
+		super().__init__(tag, attrib.copy(), text, tail, **extra)
+
+	eat_arguments = eat_arguments
+
+	def eat(self, text):
+		has_argument = re.compile(r"(?P<ARGUMENT>\()").match(text)
+		if has_argument:
+			text = self.eat_arguments(text)
+
+		from datetime import date
+		self.text = str(date.today())
+		self.set("datetime", date.today())
+
+		return text
 
 class Base(Node):
 	# substitution patterns
