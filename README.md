@@ -86,8 +86,8 @@ tetxt +div //
 #### +style and +script will escape all addup-syntax
 So you don't have to worry about your JavaScript-comments becoming HTML-styled.
 
-#### +("file.extension")
-`+("file.extension")` will start reading from another file, allowing you to easily combine multiple files into a single output file.  
+#### +read(file = "name.ext")
+`+read(file = "file.extension")` will start reading from another file, allowing you to easily combine multiple files into a single output file.  
 file.txt:
 ```txt
 ipsum lorem
@@ -95,7 +95,7 @@ ipsum lorem
 addup file:
 ```
 +div:
-	+read:(file="file.txt", tag="span")
+	+read(file="file.txt", tag="span")
 ```
 HTML output:
 ```
