@@ -86,7 +86,7 @@ tetxt +div //
 #### +style and +script will escape all addup-syntax
 So you don't have to worry about your JavaScript-comments becoming HTML-styled.
 
-<!--#### +("file.extension")
+#### +("file.extension")
 `+("file.extension")` will start reading from another file, allowing you to easily combine multiple files into a single output file.  
 file.txt:
 ```txt
@@ -94,17 +94,18 @@ ipsum lorem
 ```
 addup file:
 ```
-+div
-	+("file.txt")
++div:
+	+read:(file="file.txt", tag="span")
 ```
 HTML output:
 ```
 <div>
-	ipsum lorem
+	<span>ipsum lorem</span>
 </div>
 ```
+The content will be enclosed by a tag of choice or `<div></div>` if none are specified.
 
-#### custom tags
+<!--#### custom tags
 Make more meaningful names to your tags by making customized names with attributes of your choice. Why not make a `+bold` tag, instead of the less meaningful `b`, or a `section` tags if you find yourself using many `div`s with a `section` class?  
 There is no need to make these distinguishable from standard HTML-tags. The simpler the better.  
 Custom tags must be defined using lower case letters in the json-file, but tags in your addup-file are case-insensitive.
