@@ -3,6 +3,10 @@ import xml.etree.ElementTree as ET
 import mumath
 import textwrap
 
+EXEC = False
+
+#pathstack = ["tests/"] # when testing
+pathstack = [""] # for relative imports
 
 def treebuilder(text, **options):
 	"""
@@ -168,6 +172,8 @@ class Addup(Node):
 					"script" : Raw,
 					"math"   : Math, # For mathjax, deprecated
 					"read"   : Read,
+					"image"  : Image,
+					"css"    : CSS,
 					"now"    : Date,
 				}.get(tag, Addup)(tag = tag)
 			code = lambda tag: Code(tag = "template", token = tag)
@@ -264,6 +270,11 @@ class Code(Node):
 		else:
 			self.tag = "span"
 
+		if "run" in self.keys():
+			self.attrib.pop("run")
+			if EXEC == True:
+				exec(self.text)
+
 		self.parse()
 
 		return inedible_text
@@ -327,10 +338,16 @@ class Code(Node):
 		            yield i, f'<code class="inline highlight">{t}</code>'
 		        yield 0, ''
 
+		if "numbering" in self.keys():
+			line_numbering = "table"
+			self.attrib.pop("numbering", None)
+		else:
+			line_numbering = False
+
 		#get the formatter(s)
 		formatter = {
 			"block": BlockHtmlFormatter(
-				#linenos       = "table",
+				linenos       = line_numbering,
 				linenostart   = 0,
 				lineanchors   = f"no_anchor",
 				lineseparator = "<br>",
@@ -452,15 +469,64 @@ class Read(Node):
 		return text
 
 	def parse(self):
-		with open(self.attrib.pop("file"), mode='r') as ifile:
-			template_root = Addup("root")
+		path = ''.join(pathstack)+self.attrib.pop("loc")
+		with open(path, mode='r') as ifile:
+			import os
+			pathstack.append(os.path.dirname(ifile.name)+'/')
 
+			template_root = Addup("root")
 			template_root.text = ifile.read()
 			template_root.parse()
+
+			pathstack.pop()
 
 			for child in template_root:
 				self.append(child)
 
+class Image(Node):
+	def __init__(self, tag, attrib={}, text="", tail="", **extra):
+		super().__init__(tag, attrib.copy(), text, tail, **extra)
+
+	eat_arguments = eat_arguments
+
+	def eat(self, text):
+		has_argument = re.compile(r"(?P<ARGUMENT>\()").match(text)
+		if has_argument:
+			text = self.eat_arguments(text)
+
+		self.parse()
+		self.tag = "img"
+
+		return text
+
+	def parse(self):
+		path = ''.join(pathstack)+self.attrib.pop("loc")
+		with open(path, mode='rb') as img_file:
+			import base64
+			b64 = base64.b64encode(img_file.read()).decode("utf-8")
+			self.set("src", f"data:image/png;base64,{b64}")
+
+
+class CSS(Node):
+	def __init__(self, tag, attrib={}, text="", tail="", **extra):
+		super().__init__(tag, attrib.copy(), text, tail, **extra)
+
+	eat_arguments = eat_arguments
+
+	def eat(self, text):
+		has_argument = re.compile(r"(?P<ARGUMENT>\()").match(text)
+		if has_argument:
+			text = self.eat_arguments(text)
+
+		self.parse()
+		self.tag = "style"
+
+		return text
+
+	def parse(self):
+		path = ''.join(pathstack)+self.attrib.pop("loc")
+		with open(path, mode='r') as css_file:
+			self.text = css_file.read()
 
 class Date(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
