@@ -6,7 +6,7 @@ import textwrap
 EXEC = False
 
 #pathstack = ["tests/"] # when testing
-pathstack = [""] # for relative imports
+pathstack = [] # for relative imports
 
 def treebuilder(text, **options):
 	"""
@@ -472,7 +472,10 @@ class Read(Node):
 		path = ''.join(pathstack)+self.attrib.pop("loc")
 		with open(path, mode='r') as ifile:
 			import os
-			pathstack.append(os.path.dirname(ifile.name)+'/')
+			if os.path.dirname(ifile.name):
+				pathstack.append(os.path.dirname(ifile.name)+'/')
+			else: # if same folder
+				pathstack.append('./')
 
 			template_root = Addup("root")
 			template_root.text = ifile.read()
