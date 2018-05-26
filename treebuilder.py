@@ -112,7 +112,7 @@ class Addup(Node):
 		r"(?=^|[^\\])(?P<code>`+)",
 		r"(?=^|[^\\])(?P<math>\$+)",
 		r"(?=^|[^\\])(?P<comment>//)",
-		r"(?P<eof>\Z)",
+		r"(?P<eof>\Z)", # fix : rename to <eol>
 	]
 
 	# compile
@@ -151,7 +151,6 @@ class Addup(Node):
 		return inedible_text
 
 	def parse(self):
-
 		# Searches through tokens
 		mo = Addup.tp.search(self.text)
 		element_type = mo.lastgroup
@@ -163,8 +162,9 @@ class Addup(Node):
 		self.text = Addup.sp.sub(lambda s: Addup.sub_patterns[s.group(0)], self.text)
 		self.text = re.sub(r'\\(.)', r'\1', self.text)
 
-		while text:
+		while element_type != "eof":
 			tag = mo.group(element_type)
+
 
 			def addup(tag):
 				return {
@@ -189,7 +189,7 @@ class Addup(Node):
 			text = child.eat(text)
 			self.append(child)
 
-			if not text: break
+			if element_type == "eof": break
 
 			mo = Addup.tp.search(text)
 			element_type = mo.lastgroup
@@ -469,10 +469,11 @@ class Read(Node):
 		return text
 
 	def parse(self):
-		path = ''.join(pathstack)+self.attrib.pop("loc")
+		relative_path = self.attrib.pop("loc")
+		path = ''.join(pathstack)+relative_path
 		with open(path, mode='r') as ifile:
 			import os
-			if os.path.dirname(ifile.name):
+			if os.path.dirname(relative_path):
 				pathstack.append(os.path.dirname(ifile.name)+'/')
 			else: # if same folder
 				pathstack.append('./')
@@ -485,6 +486,7 @@ class Read(Node):
 
 			for child in template_root:
 				self.append(child)
+
 
 class Image(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
