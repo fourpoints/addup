@@ -263,7 +263,7 @@ class Code(Node):
 		token = re.compile('|'.join((END, EOF)), re.M).search(text)
 
 		self.text, inedible_text = text[:token.start()], text[token.end():]
-		self.text = self.text.strip(r'\n')
+		self.text = self.text.strip('\n')
 
 		if '\n' in self.text or "block" in self.keys():
 			self.tag = "div"
@@ -440,7 +440,7 @@ class Comment(Node):
 		self.text, inedible_text = text[:token.start()], text[token.end():]
 
 		#There may be --> in text (?)
-		self.text = self.text.strip(r'\n')
+		self.text = self.text.strip('\n')
 
 		return inedible_text
 
