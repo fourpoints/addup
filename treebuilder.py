@@ -101,7 +101,7 @@ class Node(ET.Element):
 class Addup(Node):
 	# substitution patterns
 	sub_patterns = {
-		"&": "&amp;",
+		#"&": "&amp;",
 		"<": "&lt;",
 		">": "&gt;",
 	}
@@ -165,7 +165,6 @@ class Addup(Node):
 		while element_type != "eof":
 			tag = mo.group(element_type)
 
-
 			def addup(tag):
 				return {
 					"style"  : Raw,
@@ -175,6 +174,9 @@ class Addup(Node):
 					"image"  : Image,
 					"css"    : CSS,
 					"now"    : Date,
+
+					"update" : mumath.UpdateContext,
+					"clear"  : mumath.ClearContext,
 				}.get(tag, Addup)(tag = tag)
 			code = lambda tag: Code(tag = "template", token = tag)
 			math = lambda tag: mumath.Math(tag = "math", token = tag)
@@ -187,7 +189,8 @@ class Addup(Node):
 			}.get(element_type, addup)(tag)
 
 			text = child.eat(text)
-			self.append(child)
+			if isinstance(child, ET.Element):
+				self.append(child)
 
 			if element_type == "eof": break
 
@@ -505,7 +508,7 @@ class Image(Node):
 		return text
 
 	def parse(self):
-		path = ''.join(pathstack)+self.attrib.pop("loc")
+		path = ''.join(pathstack)+self.attrib.pop("src")
 		with open(path, mode='rb') as img_file:
 			import base64
 			b64 = base64.b64encode(img_file.read()).decode("utf-8")
@@ -529,7 +532,7 @@ class CSS(Node):
 		return text
 
 	def parse(self):
-		path = ''.join(pathstack)+self.attrib.pop("loc")
+		path = ''.join(pathstack)+self.attrib.pop("href")
 		with open(path, mode='r') as css_file:
 			self.text = css_file.read()
 
@@ -549,6 +552,7 @@ class Date(Node):
 		self.set("datetime", date.today())
 
 		return text
+
 
 class Base(Node):
 	# substitution patterns
