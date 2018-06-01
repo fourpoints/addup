@@ -268,11 +268,6 @@ class Code(Node):
 		self.text, inedible_text = text[:token.start()], text[token.end():]
 		self.text = self.text.strip('\n')
 
-		if '\n' in self.text or "block" in self.keys():
-			self.tag = "div"
-		else:
-			self.tag = "span"
-
 		if "run" in self.keys():
 			self.attrib.pop("run")
 			if EXEC == True:
@@ -281,7 +276,6 @@ class Code(Node):
 		self.parse()
 
 		return inedible_text
-
 
 
 	def getlexer(self):
@@ -322,14 +316,76 @@ class Code(Node):
 		lang = lexer.aliases[0]
 
 		class BlockHtmlFormatter(HtmlFormatter):
-		    def wrap(self, source, outfile):
-		        return self._wrap_code(source)
+			def wrap(self, source, outfile):
+			    return self._wrap_code(source)
 
-		    def _wrap_code(self, source):
-		        yield 0, f'<pre class="code {lang.lower()}"><code class="highlight">'
-		        for i, t in source:
-		            yield i, f'<span class="line">{t}</span>'
-		        yield 0, '</code></pre>'
+			def _wrap_code(self, source):
+			    yield 0, f'<code class="highlight">'
+			    for i, t in source:
+			        yield i, f'<span class="line">{t}</span>'
+			    yield 0, '</code>'
+
+			def _wrap_tablelinenos(self, inner):
+				from pygments.util import StringIO
+				dummyoutfile = StringIO()
+				lncount = 0
+				for t, line in inner:
+					if t: lncount += 1
+					dummyoutfile.write(line)
+
+				fl = self.linenostart
+				mw = len(str(lncount + fl - 1))
+				sp = self.linenospecial
+				st = self.linenostep
+				la = self.lineanchors
+				aln = self.anchorlinenos
+				nocls = self.noclasses
+				if sp:
+					lines = []
+
+					for i in range(fl, fl+lncount):
+						if i % st == 0:
+							if i % sp == 0:
+								if aln:
+									lines.append('<a href="#%s-%d" class="special">%*d</a>' %
+									             (la, i, mw, i))
+								else:
+									lines.append('<span class="special">%*d</span>' % (mw, i))
+							else:
+								if aln:
+									lines.append('<a href="#%s-%d">%*d</a>' % (la, i, mw, i))
+								else:
+									lines.append('%*d' % (mw, i))
+						else:
+							lines.append('')
+					ls = '\n'.join(lines)
+				else:
+					lines = []
+					for i in range(fl, fl+lncount):
+						if i % st == 0:
+							if aln:
+								lines.append('<a href="#%s-%d">%*d</a>' % (la, i, mw, i))
+							else:
+								lines.append('%*d' % (mw, i))
+						else:
+							lines.append('')
+					ls = '\n'.join(lines)
+
+				# in case you wonder about the seemingly redundant <div> here: since the
+				# content in the other cell also is wrapped in a div, some browsers in
+				# some configurations seem to mess up the formatting...
+				if nocls:
+					yield 0, (#'<table class="%stable">' % self.cssclass +
+								'<tr><td><div class="linenodiv" '
+								'style="background-color: #f0f0f0; padding-right: 10px">'
+								'<pre style="line-height: 125%">' +
+								ls + '</pre></div></td><td class="code">')
+				else:
+					yield 0, (#'<table class="%stable">' % self.cssclass +
+								'<tr><td class="linenos"><div class="linenodiv"><pre>' +
+								ls + '</pre></div></td><td class="code">')
+				yield 0, '<pre class="code">' + dummyoutfile.getvalue() + '</pre>'
+				yield 0, '</td></tr>'#</table>'
 
 		class InlineHtmlFormatter(HtmlFormatter):
 		    def wrap(self, source, outfile):
@@ -338,14 +394,33 @@ class Code(Node):
 		    def _wrap_code(self, source):
 		        yield 0, ''
 		        for i, t in source:
-		            yield i, f'<code class="inline highlight">{t}</code>'
+		            yield i, t
 		        yield 0, ''
 
-		if "numbering" in self.keys():
-			line_numbering = "table"
-			self.attrib.pop("numbering", None)
+
+		if '\n' in self.text or "block" in self.keys():
+			if "numbering" in self.keys():
+				line_numbering = "table"
+				self.attrib.pop("numbering", None)
+				self.tag = "table"
+				try:
+					self.attrib["class"] += "highlighttable"
+				except KeyError:
+					self.attrib["class"] = "highlighttable"
+			else:
+				line_numbering = False
+				self.tag = "pre"
+				try:
+					self.attrib["class"] += "code"
+				except KeyError:
+					self.attrib["class"] = "code"
 		else:
+			self.tag = "code"
 			line_numbering = False
+			try:
+				self.attrib["class"] += " inline highlight"
+			except KeyError:
+				self.attrib["class"] = "inline highlight"
 
 		#get the formatter(s)
 		formatter = {
@@ -547,6 +622,7 @@ class Date(Node):
 		if has_argument:
 			text = self.eat_arguments(text)
 
+		self.tag = "date"
 		from datetime import date
 		self.text = str(date.today())
 		self.set("datetime", date.today())

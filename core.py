@@ -4,7 +4,7 @@ File info
 """
 
 from treebuilder import treebuilder
-import xml.etree.cElementTree as et
+import xml.etree.ElementTree as et
 
 def addup(**options):
 
@@ -31,14 +31,18 @@ def addup(**options):
 		if root.attrib.pop("doctype", False):
 			file.write("<!DOCTYPE html>")
 		for subtree in root:
-			writer(file, subtree, -100)
+			writer(file, subtree, 0)
 
 
 INLINE = {"a", "abbr", "acronym", "b", "bdo", "big", "br", "button", "cite", "code", "dfn", "em", "i", "img", "input", "kbd", "label", "map", "object", "q", "samp", "script", "select", "small", "span", "strong", "sub", "sup", "textarea", "time", "tt", "var"}
 
 OPTIONAL = {"body", "colgroup", "dd", "dt", "head", "html", "li", "option", "p", "tbody", "td", "tfoot", "th", "thead", "tr"}
 
-SELFCLOSE = {"area", "base", "basefont", "br", "col", "frame", "hr", "img", "input", "link", "meta", "param"}
+SELFCLOSE = {"area", "base", "basefont", "br", "col", "frame", "hr", "img", "input", "link", "meta", "param", "mprescripts", "none", "mspace",}
+
+MML = {"math", "maction", "maligngroup", "malignmark", "menclose", "merror", "mfenced", "mfrac", "mglyph", "mi", "mlabeledtr", "mlongdiv", "mmultiscripts", "mn", "mo", "mover", "mpadded", "mphantom", "mroot", "mrow", "ms", "mscarries", "mscarry", "msgroup", "mstack", "mlongdiv", "msline", "mspace", "msqrt", "msrow", "mstack", "mstyle", "msub", "msub", "msup", "msubsup", "mtable", "mtd", "mtext", "mtr", "munder", "munderover", "semantics", "annotation", "annotation-xml", "mprescripts", "none"}
+
+XML = {"mprescripts", "none"}
 
 # sample writer
 def writer(file, tree, level):
@@ -50,28 +54,32 @@ def writer(file, tree, level):
 		file.write(f"<{tree.tag}")
 		for attribute, value in tree.attrib.items():
 			file.write(f' {attribute}="{value}"')
-		file.write(">")
+		if tree.tag in XML:
+			file.write("/>") #xml compliance for mathml
+		else:
+			file.write(">")
 
 	#content
 	if tree.text:
 		lines = tree.text.splitlines()
 		file.write(lines[0])
-		if tree.tag != "pre":
+		if tree.tag == "pre" or tree.tag == "table" and "highlighttable" in tree.attrib.get("class"):
 			for line in lines[1:]:
-				file.write("\n" + level*"\t" + line)
+				file.write("\n" + line)
 		else:
 			for line in lines[1:]:
-				print(line)
-				file.write("\n" + line)
+				file.write("\n" + level*"\t" + line)
 
 	#subtree
 	if tree:
 		for subtree in tree:
-			if tree.tag != "pre": writer(file, subtree, level+1)
-			else: writer(file, subtree, -100)
+			if subtree.tag == "pre" or subtree.tag == "table" and "highlighttable" in subtree.get("class"):
+				writer(file, subtree, 0)
+			else:
+				writer(file, subtree, level+1)
 
 	#closing tag
-	if tree.tag not in INLINE: file.write("\n" + level*"\t")
+	if tree.tag not in INLINE and tree.tag != "pre": file.write("\n" + level*"\t")
 	if tree.tag not in SELFCLOSE:
 		if tree.tag is et.Comment:
 			file.write("-->")
@@ -86,4 +94,4 @@ def writer(file, tree, level):
 			file.write("\n" + level*"\t" + line)
 
 if __name__ == "__main__":
-	addup(infile = "tests/current.add", outfile = "tests/current.html", extension =[])
+	addup(infile = "tests/site.add", outfile = "tests/site.html", extension =[])
