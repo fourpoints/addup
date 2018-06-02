@@ -173,6 +173,7 @@ class Addup(Node):
 					"read"   : Read,
 					"image"  : Image,
 					"css"    : CSS,
+					"js"    : JS,
 					"now"    : Date,
 
 					"update" : mumath.UpdateContext,
@@ -384,7 +385,7 @@ class Code(Node):
 					yield 0, (#'<table class="%stable">' % self.cssclass +
 								'<tr><td class="linenos"><div class="linenodiv"><pre>' +
 								ls + '</pre></div></td><td class="code">')
-				yield 0, '<pre class="code">' + dummyoutfile.getvalue() + '</pre>'
+				yield 0, f'<pre class="code {lang}">' + dummyoutfile.getvalue() + '</pre>'
 				yield 0, '</td></tr>'#</table>'
 
 		class InlineHtmlFormatter(HtmlFormatter):
@@ -411,9 +412,9 @@ class Code(Node):
 				line_numbering = False
 				self.tag = "pre"
 				try:
-					self.attrib["class"] += "code"
+					self.attrib["class"] += f"code {lang}"
 				except KeyError:
-					self.attrib["class"] = "code"
+					self.attrib["class"] = f"code {lang}"
 		else:
 			self.tag = "code"
 			line_numbering = False
@@ -610,6 +611,27 @@ class CSS(Node):
 		path = ''.join(pathstack)+self.attrib.pop("href")
 		with open(path, mode='r') as css_file:
 			self.text = css_file.read()
+
+class JS(Node):
+	def __init__(self, tag, attrib={}, text="", tail="", **extra):
+		super().__init__(tag, attrib.copy(), text, tail, **extra)
+
+	eat_arguments = eat_arguments
+
+	def eat(self, text):
+		has_argument = re.compile(r"(?P<ARGUMENT>\()").match(text)
+		if has_argument:
+			text = self.eat_arguments(text)
+
+		self.parse()
+		self.tag = "script"
+
+		return text
+
+	def parse(self):
+		path = ''.join(pathstack)+self.attrib.pop("src")
+		with open(path, mode='r') as js_file:
+			self.text = js_file.read()
 
 class Date(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
