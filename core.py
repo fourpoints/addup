@@ -42,7 +42,7 @@ SELFCLOSE = {"area", "base", "basefont", "br", "col", "frame", "hr", "img", "inp
 
 MML = {"math", "maction", "maligngroup", "malignmark", "menclose", "merror", "mfenced", "mfrac", "mglyph", "mi", "mlabeledtr", "mlongdiv", "mmultiscripts", "mn", "mo", "mover", "mpadded", "mphantom", "mroot", "mrow", "ms", "mscarries", "mscarry", "msgroup", "mstack", "mlongdiv", "msline", "mspace", "msqrt", "msrow", "mstack", "mstyle", "msub", "msub", "msup", "msubsup", "mtable", "mtd", "mtext", "mtr", "munder", "munderover", "semantics", "annotation", "annotation-xml", "mprescripts", "none"}
 
-XML = {"mprescripts", "none"}
+XML = {"mspace", "mprescripts", "none"}
 
 # sample writer
 def writer(file, tree, level):
