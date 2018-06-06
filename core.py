@@ -63,7 +63,7 @@ def writer(file, tree, level):
 	if tree.text:
 		lines = tree.text.splitlines()
 		file.write(lines[0])
-		if tree.tag == "pre" or tree.tag == "table" and "highlighttable" in tree.attrib.get("class"):
+		if tree.tag == "pre" or tree.tag == "table" and "highlighttable" in tree.attrib.get("class", ""):
 			for line in lines[1:]:
 				file.write("\n" + line)
 		else:
@@ -73,7 +73,7 @@ def writer(file, tree, level):
 	#subtree
 	if tree:
 		for subtree in tree:
-			if subtree.tag == "pre" or subtree.tag == "table" and "highlighttable" in subtree.get("class"):
+			if subtree.tag == "pre" or subtree.tag == "table" and "highlighttable" in subtree.get("class", ""):
 				writer(file, subtree, 0)
 			else:
 				writer(file, subtree, level+1)
