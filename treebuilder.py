@@ -307,12 +307,6 @@ class Code(Node):
 		from pygments.formatters import HtmlFormatter
 		from pygments.formatters import NullFormatter
 
-		if '\n' in self.text or "block" in self.keys():
-			type_ = "block"
-			self.attrib.pop("block", None)
-		else:
-			type_ = "inline"
-
 		lexer = self.getlexer()
 		lang = lexer.aliases[0]
 
@@ -400,6 +394,7 @@ class Code(Node):
 
 
 		if '\n' in self.text or "block" in self.keys():
+			type_ = "block"
 			if "numbering" in self.keys():
 				line_numbering = "table"
 				self.attrib.pop("numbering", None)
@@ -417,6 +412,7 @@ class Code(Node):
 					self.attrib["class"] = f"code {lang}"
 		else:
 			self.tag = "code"
+			type_ = "inline"
 			line_numbering = False
 			try:
 				self.attrib["class"] += " inline highlight"
