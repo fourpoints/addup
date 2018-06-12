@@ -6,7 +6,7 @@ File info
 import argparse
 import os.path
 import sys
-from . import addup
+from core import addup
 
 def commandline_options():
 	def check_valid_ext(filetype, valid_ext):
