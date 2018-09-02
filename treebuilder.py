@@ -70,7 +70,7 @@ def block(node, text):
 
 def eat_arguments(node, text):
 	DEL = r'(?P<argend>\))|(?P<has_value>=)'
-	ATTR = r'\s*(?P<attribute>[\w-]+)\s*'
+	ATTR = r'\s*(?P<attribute>[\w\-:\.@]+)\s*'
 	VAL = r'\s*"(?P<value>.*?)"\s*'
 
 	tokens = re.compile('|'.join((VAL, ATTR, DEL))).finditer(text)
@@ -108,7 +108,7 @@ class Addup(Node):
 
 	# element token patterns
 	token_patterns = [
-		r"(?=^|[^\\])\+(?P<addup>\w+)",
+		r"(?=^|[^\\])\+(?P<addup>[\w-]+)",
 		r"(?=^|[^\\])(?P<code>`+)",
 		r"(?=^|[^\\])(?P<math>\$+)",
 		r"(?=^|[^\\])(?P<comment>//)",
@@ -553,12 +553,23 @@ class Read(Node):
 			else: # if same folder
 				pathstack.append('./')
 
-			template_root = Addup("root")
+			try:
+				parser = self.attrib.pop("parser")
+			except KeyError:
+				parser = "addup"
+
+			template_root = {
+				"addup" : Addup,
+				"code"  : Code,
+				"raw"   : Raw,
+			}[parser]("root")
+			template_root.attrib = self.attrib.copy() #buggy?
 			template_root.text = ifile.read()
 			template_root.parse()
 
 			pathstack.pop()
 
+			self.text = template_root.text
 			for child in template_root:
 				self.append(child)
 
@@ -575,16 +586,45 @@ class Image(Node):
 			text = self.eat_arguments(text)
 
 		self.parse()
-		self.tag = "img"
 
 		return text
 
 	def parse(self):
 		path = ''.join(pathstack)+self.attrib.pop("src")
-		with open(path, mode='rb') as img_file:
-			import base64
-			b64 = base64.b64encode(img_file.read()).decode("utf-8")
-			self.set("src", f"data:image/png;base64,{b64}")
+		try:
+			_, ext = path.rsplit('.', 1)
+			if ext == "svg":
+				self.tag = "svg"
+				svg_file = ET.parse(path).getroot()
+				self.attrib.update(svg_file.attrib)
+
+				# this is not a general solution
+				ns = {
+					"": "http://www.w3.org/2000/svg",
+					"xlink": "http://www.w3.org/1999/xlink",
+				}
+
+				# remove ns["0"] from tags
+				for c in svg_file.iter():
+					c.tag = c.tag.split('}', 1)[1]
+
+				# remove ns["1"] from the href-attrib for use-tags
+				for c in svg_file.iter("use"):
+					c.attrib['href'] = c.attrib.pop(f'{{{ns["xlink"]}}}href')
+
+				# proceed as usual
+				for c in svg_file:
+					self.append(c)
+
+			else:
+				self.tag = "img"
+				with open(path, mode='rb') as img_file:
+					import base64
+					b64 = base64.b64encode(img_file.read()).decode("utf-8")
+					self.set("src", f"data:image/png;base64,{b64}")
+		except ValueError:
+			self.tag = "img"
+			pass #no '.' in path
 
 
 class CSS(Node):
