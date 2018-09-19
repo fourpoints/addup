@@ -4,7 +4,7 @@ File info
 """
 
 from treebuilder import treebuilder
-import xml.etree.ElementTree as et
+import xml.etree.ElementTree as ET
 
 def addup(**options):
 
@@ -34,21 +34,50 @@ def addup(**options):
 			writer(file, subtree, 0)
 
 
-INLINE = {"a", "abbr", "acronym", "b", "bdo", "big", "br", "button", "cite", "code", "dfn", "em", "i", "img", "input", "kbd", "label", "map", "object", "q", "samp", "script", "select", "small", "span", "strong", "sub", "sup", "textarea", "time", "tt", "var"}
+INLINE = {
+	"a", "abbr", "acronym", "b", "bdo", "big", "br", "button", "cite", "code",
+	"dfn", "em", "i", "img", "input", "kbd", "label", "map", "object", "q",
+	"samp", "script", "select", "small", "span", "strong", "sub", "sup",
+	"textarea", "time", "tt", "var", "math"
+}
 
-OPTIONAL = {"body", "colgroup", "dd", "dt", "head", "html", "li", "option", "p", "tbody", "td", "tfoot", "th", "thead", "tr"}
+ENDINLINE = {
+	"pre", "mi", "mn", "mo", "ms", "mglyph", "mspace", "mtext"
+}
 
-SELFCLOSE = {"area", "base", "basefont", "br", "col", "frame", "hr", "img", "input", "link", "meta", "param", "mprescripts", "none", "mspace",}
+OPTIONAL = {
+	"body", "colgroup", "dd", "dt", "head", "html", "li", "option", "p",
+	"tbody", "td", "tfoot", "th", "thead", "tr"
+}
 
-MML = {"math", "maction", "maligngroup", "malignmark", "menclose", "merror", "mfenced", "mfrac", "mglyph", "mi", "mlabeledtr", "mlongdiv", "mmultiscripts", "mn", "mo", "mover", "mpadded", "mphantom", "mroot", "mrow", "ms", "mscarries", "mscarry", "msgroup", "mstack", "mlongdiv", "msline", "mspace", "msqrt", "msrow", "mstack", "mstyle", "msub", "msub", "msup", "msubsup", "mtable", "mtd", "mtext", "mtr", "munder", "munderover", "semantics", "annotation", "annotation-xml", "mprescripts", "none"}
+SELFCLOSE = {
+	"area", "base", "basefont", "br", "col", "frame", "hr", "img", "input",
+	"link", "meta", "param", "mprescripts", "none", "mspace",
+}
 
-XML = {"mspace", "mprescripts", "none"}
+MML = {
+	"math", "maction", "maligngroup", "malignmark", "menclose", "merror",
+	"mfenced", "mfrac", "mglyph", "mi", "mlabeledtr", "mlongdiv",
+	"mmultiscripts", "mn", "mo", "mover", "mpadded", "mphantom", "mroot",
+	"mrow", "ms", "mscarries", "mscarry", "msgroup", "mstack", #?
+	"mlongdiv","msline", "mspace", "msqrt", "msrow", "mstack", "mstyle",
+	"msub", "msub", "msup", "msubsup", "mtable", "mtd", "mtext", "mtr",
+	"munder", "munderover", "semantics", "annotation", "annotation-xml",
+	"mprescripts", "none"
+}
+
+XML = {
+	"mspace", "mprescripts", "none"
+}
 
 # sample writer
 def writer(file, tree, level):
 	if tree.tag not in INLINE: file.write("\n"+level*"\t")
 
-	if tree.tag is et.Comment:
+	# semi-redundant: adds newlien if math is displaystyled (depends on child)
+	if tree.tag == "math" and tree[0].tag == "mtable" and tree[0].get("displaystyle", False): file.write("\n"+level*"\t")
+
+	if tree.tag is ET.Comment:
 		file.write(f"<!--")
 	else:
 		file.write(f"<{tree.tag}")
@@ -79,9 +108,9 @@ def writer(file, tree, level):
 				writer(file, subtree, level+1)
 
 	#closing tag
-	if tree.tag not in INLINE and tree.tag != "pre": file.write("\n" + level*"\t")
+	if tree.tag not in INLINE | ENDINLINE: file.write("\n" + level*"\t")
 	if tree.tag not in SELFCLOSE:
-		if tree.tag is et.Comment:
+		if tree.tag is ET.Comment:
 			file.write("-->")
 		else:
 			file.write(f"</{tree.tag}>")

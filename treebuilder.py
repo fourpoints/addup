@@ -4,6 +4,7 @@ import mumath
 import textwrap
 
 EXEC = False
+DOTCLASS = True #ctrl+f DOTCLASS for changes
 
 #pathstack = ["tests/"] # when testing
 pathstack = [] # for relative imports
@@ -108,7 +109,7 @@ class Addup(Node):
 
 	# element token patterns
 	token_patterns = [
-		r"(?=^|[^\\])\+(?P<addup>[\w-]+)",
+		r"(?=^|[^\\])\+(?P<addup>[\w\-\.]+)", #DOTCLASS
 		r"(?=^|[^\\])(?P<code>`+)",
 		r"(?=^|[^\\])(?P<math>\$+)",
 		r"(?=^|[^\\])(?P<comment>//)",
@@ -121,7 +122,11 @@ class Addup(Node):
 	tp = re.compile("|".join(token_patterns), re.M)
 
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
-		super().__init__(tag, attrib.copy(), text, tail, **extra)
+		attrib = attrib.copy()
+		dotclass = extra.pop("classes", None) #DOTCLASS
+		if dotclass:
+			attrib["class"] = " ".join(dotclass)
+		super().__init__(tag, attrib, text, tail, **extra)
 
 	eat_inline = inline
 	eat_block = block
@@ -163,7 +168,7 @@ class Addup(Node):
 		self.text = re.sub(r'\\(.)', r'\1', self.text)
 
 		while element_type != "eof":
-			tag = mo.group(element_type)
+			tag, *classes = mo.group(element_type).split('.') #DOTCLASS
 
 			def addup(tag):
 				return {
@@ -173,12 +178,12 @@ class Addup(Node):
 					"read"   : Read,
 					"image"  : Image,
 					"css"    : CSS,
-					"js"    : JS,
+					"js"     : JS,
 					"now"    : Date,
 
 					"update" : mumath.UpdateContext,
 					"clear"  : mumath.ClearContext,
-				}.get(tag, Addup)(tag = tag)
+				}.get(tag, Addup)(tag = tag, classes=classes)
 			code = lambda tag: Code(tag = "template", token = tag)
 			math = lambda tag: mumath.Math(tag = "math", token = tag)
 			comment = lambda tag: Comment(tag = ET.Comment)
@@ -525,6 +530,7 @@ class Comment(Node):
 
 class Read(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
+		extra.pop("classes") #DOTCLASS
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	eat_arguments = eat_arguments
@@ -576,6 +582,7 @@ class Read(Node):
 
 class Image(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
+		extra.pop("classes") #DOTCLASS
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	eat_arguments = eat_arguments
@@ -597,6 +604,8 @@ class Image(Node):
 				self.tag = "svg"
 				svg_file = ET.parse(path).getroot()
 				self.attrib.update(svg_file.attrib)
+				self.attrib["height"] = "100%"
+				self.attrib["width"]  = "100%"
 
 				# this is not a general solution
 				ns = {
@@ -629,6 +638,7 @@ class Image(Node):
 
 class CSS(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
+		extra.pop("classes") #DOTCLASS
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	eat_arguments = eat_arguments
@@ -650,6 +660,7 @@ class CSS(Node):
 
 class JS(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
+		extra.pop("classes") #DOTCLASS
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	eat_arguments = eat_arguments
@@ -671,6 +682,7 @@ class JS(Node):
 
 class Date(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
+		extra.pop("classes") #DOTCLASS
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	eat_arguments = eat_arguments
@@ -680,7 +692,7 @@ class Date(Node):
 		if has_argument:
 			text = self.eat_arguments(text)
 
-		self.tag = "date"
+		self.tag = "time"
 		from datetime import date
 		self.text = str(date.today())
 		self.set("datetime", date.today())
