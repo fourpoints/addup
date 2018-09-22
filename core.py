@@ -31,7 +31,8 @@ def addup(**options):
 		if root.attrib.pop("doctype", False):
 			file.write("<!DOCTYPE html>")
 		for subtree in root:
-			writer(file, subtree, 0)
+			writer(file, subtree, level=0, nl='\n', tab=' ')
+			#writer(file, subtree, level=0, nl='', tab='') #for compact file
 
 
 INLINE = {
@@ -42,7 +43,8 @@ INLINE = {
 }
 
 ENDINLINE = {
-	"pre", "mi", "mn", "mo", "ms", "mglyph", "mspace", "mtext"
+	"pre", "mi", "mn", "mo", "ms", "mglyph", "mspace", "mtext", "h1", "h2",
+	"h3", "h4", "h5", "h6", "title"
 }
 
 OPTIONAL = {
@@ -71,11 +73,11 @@ XML = {
 }
 
 # sample writer
-def writer(file, tree, level):
-	if tree.tag not in INLINE: file.write("\n"+level*"\t")
+def writer(file, tree, level, nl, tab):
+	if tree.tag not in INLINE: file.write(nl+level*tab)
 
 	# semi-redundant: adds newlien if math is displaystyled (depends on child)
-	if tree.tag == "math" and tree[0].tag == "mtable" and tree[0].get("displaystyle", False): file.write("\n"+level*"\t")
+	if tree.tag == "math" and tree[0].tag == "mtable" and tree[0].get("displaystyle", False): file.write(nl+level*tab)
 
 	if tree.tag is ET.Comment:
 		file.write(f"<!--")
@@ -94,21 +96,22 @@ def writer(file, tree, level):
 		file.write(lines[0])
 		if tree.tag == "pre" or tree.tag == "table" and "highlighttable" in tree.attrib.get("class", ""):
 			for line in lines[1:]:
-				file.write("\n" + line)
+				file.write(nl + line)
 		else:
 			for line in lines[1:]:
-				file.write("\n" + level*"\t" + line)
+				file.write(nl + level*tab + line)
 
 	#subtree
 	if tree:
 		for subtree in tree:
 			if subtree.tag == "pre" or subtree.tag == "table" and "highlighttable" in subtree.get("class", ""):
-				writer(file, subtree, 0)
+				writer(file, subtree, level=0, nl=nl, tab=tab)
 			else:
-				writer(file, subtree, level+1)
+				writer(file, subtree, level=level+1, nl=nl, tab=tab)
 
 	#closing tag
-	if tree.tag not in INLINE | ENDINLINE: file.write("\n" + level*"\t")
+	if tree.tag not in INLINE | ENDINLINE:
+		file.write(nl + level*tab)
 	if tree.tag not in SELFCLOSE:
 		if tree.tag is ET.Comment:
 			file.write("-->")
@@ -120,7 +123,7 @@ def writer(file, tree, level):
 		lines = tree.tail.splitlines()
 		file.write(lines[0])
 		for line in lines[1:]:
-			file.write("\n" + level*"\t" + line)
+			file.write(nl + level*tab + line)
 
 if __name__ == "__main__":
 	addup(infile = "tests/site.add", outfile = "tests/site.html", extension =[])
