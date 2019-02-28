@@ -47,7 +47,7 @@
 #### +tag
 `+tag(attribute="value"):(content)` creates opening and closing tags around the indented block. Note that `+ tag` will be ignored by the interpreter. The `tag` must be followed by a space/newline ("` `", "`\n`") or an opening bracket ("`(`").
 ```
-+div text
++div: text
 	text
 text
 ```
