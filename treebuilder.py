@@ -587,6 +587,7 @@ class Read(Node):
 			template_root.text = ifile.read()
 			template_root.parse()
 
+			global pathstack
 			pathstack = pathstack.parent
 
 			self.text = template_root.text
