@@ -4,15 +4,15 @@ File info
 """
 
 import argparse
-import os.path
+from pathlib import Path
 import sys
 from core import addup
 
 def commandline_options():
 	def check_valid_ext(filetype, valid_ext):
-		def valid_file(file_):
-			base, ext = os.path.splitext(file_)
-			if ext == valid_ext: return base
+		def valid_file(file_path):
+			path = Path(file_path)
+			if path.suffix == valid_ext: return path
 			raise argparse.ArgumentTypeError(f'{filetype} must have a {valid_ext} extension')
 		return valid_file
 
@@ -21,11 +21,15 @@ def commandline_options():
 		type=check_valid_ext("input file", ".add"), help='The input .add-file.')
 	parser.add_argument("-f", "--outfile", default=None,
 		type=check_valid_ext("output file", ".html"), help='The output .html-file.')
+	parser.add_argument("-n", "--name", default=None, help='The name of the .html-file.')
 	parser.add_argument("-x", "--extension", nargs="*", default=None, help='Extensions (NotImplemented).')
 
 	options = parser.parse_args()
-	options.outfile = f"{options.outfile or options.infile}.html"
-	options.infile = f"{options.infile}.add"
+	options.outfile = options.outfile or options.infile.with_suffix('.html')
+	options.infile = options.infile
+	options.name = options.name or options.outfile.stem
+	options.dir = options.infile.parent
+
 	if options.extension is None: options.extension = []
 
 	return vars(options)

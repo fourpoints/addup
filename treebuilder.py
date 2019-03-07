@@ -5,25 +5,36 @@ import textwrap
 
 EXEC = False
 DOTCLASS = True #ctrl+f DOTCLASS for changes
+#ATID = True # TODO
 
-#pathstack = ["tests/"] # when testing
-pathstack = [] # for relative imports
+# pathlib.Path object
+pathstack = None
 
-def treebuilder(text, **options):
+def get_doctype(root):
+	# This parts checks if the first line contains a doctype
+	# If it does, it trims of the first line.
+	# Note: this does not read the content of the doctype specification.
+	m = re.match(r"\+doctype\((?P<type>\w*)\)\s", root.text)
+	if m:
+		root.set("doctype", m['type'])
+		root.text = root.text[m.end():]
+
+def treebuilder(file_path, dir, **options):
 	"""
 	This function does things
 	"""
 
+	# reset directory
+	global pathstack
+	pathstack = dir
+
 	root = Addup("root")
 
-	# This parts checks if the first line contains a doctype
-	# If it does, it trims of the first line.
-	# Note: this does not read the content of the doctype specification.
-	if re.match(r"\+doctype.*?\s", text):
-		root.set("doctype", True)
-		text = text[re.match(r"\+doctype.*?\s", text).end():]
+	with open(file_path, mode="r", encoding="utf-8") as file:
+		root.text = file.read()
 
-	root.text = text
+	get_doctype(root) # possibly none
+
 	root.parse()
 
 	return root
@@ -212,6 +223,7 @@ class Addup(Node):
 
 class Raw(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
+		extra.pop("classes") #DOTCLASS
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	eat_inline = inline
@@ -428,7 +440,7 @@ class Code(Node):
 		formatter = {
 			"block": BlockHtmlFormatter(
 				linenos       = line_numbering,
-				linenostart   = 0,
+				linenostart   = 1, # start counting lineno from 1
 				lineanchors   = f"no_anchor",
 				lineseparator = "<br>",
 			),
@@ -443,6 +455,8 @@ class Code(Node):
 			lexer     = lexer,
 			formatter = formatter[type_],
 		)
+
+		#print(self.text)
 
 
 class Math(Node):
@@ -551,13 +565,13 @@ class Read(Node):
 
 	def parse(self):
 		relative_path = self.attrib.pop("loc")
-		path = ''.join(pathstack)+relative_path
+		path = pathstack / relative_path
 		with open(path, mode='r') as ifile:
 			import os
 			if os.path.dirname(relative_path):
-				pathstack.append(os.path.dirname(ifile.name)+'/')
+				pathstack / os.path.dirname(ifile.name)
 			else: # if same folder
-				pathstack.append('./')
+				pathstack / '.'
 
 			try:
 				parser = self.attrib.pop("parser")
@@ -573,7 +587,7 @@ class Read(Node):
 			template_root.text = ifile.read()
 			template_root.parse()
 
-			pathstack.pop()
+			pathstack = pathstack.parent
 
 			self.text = template_root.text
 			for child in template_root:
@@ -597,7 +611,7 @@ class Image(Node):
 		return text
 
 	def parse(self):
-		path = ''.join(pathstack)+self.attrib.pop("src")
+		path = pathstack / self.attrib.pop("src")
 		try:
 			_, ext = path.rsplit('.', 1)
 			if ext == "svg":
@@ -654,7 +668,7 @@ class CSS(Node):
 		return text
 
 	def parse(self):
-		path = ''.join(pathstack)+self.attrib.pop("href")
+		path = pathstack / self.attrib.pop("href")
 		with open(path, mode='r') as css_file:
 			self.text = css_file.read()
 
@@ -676,7 +690,7 @@ class JS(Node):
 		return text
 
 	def parse(self):
-		path = ''.join(pathstack)+self.attrib.pop("src")
+		path = pathstack / self.attrib.pop("src")
 		with open(path, mode='r') as js_file:
 			self.text = js_file.read()
 
