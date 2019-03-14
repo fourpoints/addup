@@ -58,6 +58,29 @@ text
 text
 ```
 
+
+#### attributes
+`+tag(attribute="value")` are comma-separated entries. This will be converted to `<tag attribute="value"></tag>`.
+
+##### .class and @id
+`+span.hello@world` Multiple classes and ids may be added by using CSS selector style syntax. This will be converted to `<span class="hello" id="world"></span>`
+
+#### inline vs block
+the following addup text
+```
++div:
+	all text in the indented block will be wrapped in <div></div> tags.
+	+span:(all text inside brackets will be wrapped in  <span></span> tags)
+```
+will be converted to
+```html
+<div>
+	all text in the indented block will be wrapped in <div></div> tags.
+	<span>all text inside brackets will be wrapped in  <span></span> tags</span>
+</div>
+```
+
+
 #### //comment
 `//comment` creates an inline comment. (Multi-line comments are not supported.)
 ```
@@ -80,7 +103,7 @@ tetxt +div //
 `` `(lang) content` `` is highlighted with pygments
 
 #### Math
-`$(align) $` is shorthand for `\begin{align*} \end{align*}`
+`$(align) $` is shorthand for `\begin{align*} \end{align*}`. Simple math may also be used `$x+y$`, and will be rendered in MathML using mumath.
 
 
 #### +style and +script will escape all addup-syntax
