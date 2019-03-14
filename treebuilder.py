@@ -3,9 +3,8 @@ import xml.etree.ElementTree as ET
 import mumath
 import textwrap
 
+# Allows for the exec() to be used to run code while compiling
 EXEC = False
-DOTCLASS = True #ctrl+f DOTCLASS for changes
-#ATID = True # TODO
 
 # pathlib.Path object
 pathstack = None
@@ -102,6 +101,28 @@ def eat_arguments(node, text):
 		if type_ == "argend":
 			return text[mo.end():]
 
+def eat_classifiers(node, text):
+	classifiers = re.compile(r"(?P<CLASSID>[\.@][\w\-]+)+").match(text)
+
+	# first element will be empty string, then every other element will be a separator (. or @) with the succeeding element the class/id name.
+	classifier_list = re.split("([\.@])", text[:classifiers.end()])
+
+	classifier_iter = iter(classifier_list[1:])
+	# groups two at a time
+	classifier_tuples = zip(classifier_iter, classifier_iter)
+
+	def extend_attribute(attribute, value):
+		try:
+			node.attrib[attribute] += " " + value
+		except KeyError:
+			node.attrib[attribute] = value
+
+	for classifier_token, classifier_name in classifier_tuples:
+		classifier_type = "id" if classifier_token == "@" else "class"
+		extend_attribute(classifier_type, classifier_name)
+
+	return text[classifiers.end():]
+
 
 class Node(ET.Element):
 	def __init__(self, tag, attrib, text, tail, **extra):
@@ -120,7 +141,7 @@ class Addup(Node):
 
 	# element token patterns
 	token_patterns = [
-		r"(?=^|[^\\])\+(?P<addup>[\w\-\.]+)", #DOTCLASS
+		r"(?=^|[^\\])\+(?P<addup>[\w\-\.]+)",
 		r"(?=^|[^\\])(?P<code>`+)",
 		r"(?=^|[^\\])(?P<math>\$+)",
 		r"(?=^|[^\\])(?P<comment>//)",
@@ -134,16 +155,18 @@ class Addup(Node):
 
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
 		attrib = attrib.copy()
-		dotclass = extra.pop("classes", None) #DOTCLASS
-		if dotclass:
-			attrib["class"] = " ".join(dotclass)
 		super().__init__(tag, attrib, text, tail, **extra)
 
-	eat_inline = inline
-	eat_block = block
-	eat_arguments = eat_arguments
+	eat_inline      = inline           # (bracketed)
+	eat_block       = block            #     indented block
+	eat_arguments   = eat_arguments    # (attribute="value")
+	eat_classifiers = eat_classifiers  # .class@id
 
 	def eat(self, text):
+		has_classifier = re.compile(r"(?P<CLASSID>[\.@][\w\-]+)+").match(text)
+		if has_classifier:
+			text = self.eat_classifiers(text)
+
 		has_argument = re.compile(r"(?P<ARGUMENT>\()").match(text)
 		if has_argument:
 			text = self.eat_arguments(text)
@@ -176,10 +199,11 @@ class Addup(Node):
 
 		# Add the text to the node
 		self.text = Addup.sp.sub(lambda s: Addup.sub_patterns[s.group(0)], self.text)
+		# \e -> e (for escaped elements)
 		self.text = re.sub(r'\\(.)', r'\1', self.text)
 
 		while element_type != "eof":
-			tag, *classes = mo.group(element_type).split('.') #DOTCLASS
+			tag = mo.group(element_type)
 
 			def addup(tag):
 				return {
@@ -194,7 +218,7 @@ class Addup(Node):
 
 					"update" : mumath.UpdateContext,
 					"clear"  : mumath.ClearContext,
-				}.get(tag, Addup)(tag = tag, classes=classes)
+				}.get(tag, Addup)(tag = tag)
 			code = lambda tag: Code(tag = "template", token = tag)
 			math = lambda tag: mumath.Math(tag = "math", token = tag)
 			comment = lambda tag: Comment(tag = ET.Comment)
@@ -223,7 +247,6 @@ class Addup(Node):
 
 class Raw(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
-		extra.pop("classes") #DOTCLASS
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	eat_inline = inline
@@ -417,14 +440,14 @@ class Code(Node):
 				self.attrib.pop("numbering", None)
 				self.tag = "table"
 				try:
-					self.attrib["class"] += "highlighttable"
+					self.attrib["class"] += " highlighttable"
 				except KeyError:
 					self.attrib["class"] = "highlighttable"
 			else:
 				line_numbering = False
 				self.tag = "pre"
 				try:
-					self.attrib["class"] += f"code {lang}"
+					self.attrib["class"] += f" code {lang}"
 				except KeyError:
 					self.attrib["class"] = f"code {lang}"
 		else:
@@ -544,7 +567,6 @@ class Comment(Node):
 
 class Read(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
-		extra.pop("classes") #DOTCLASS
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	eat_arguments = eat_arguments
@@ -564,6 +586,8 @@ class Read(Node):
 		return text
 
 	def parse(self):
+		global pathstack
+
 		relative_path = self.attrib.pop("loc")
 		path = pathstack / relative_path
 		with open(path, mode='r') as ifile:
@@ -587,7 +611,6 @@ class Read(Node):
 			template_root.text = ifile.read()
 			template_root.parse()
 
-			global pathstack
 			pathstack = pathstack.parent
 
 			self.text = template_root.text
@@ -597,7 +620,6 @@ class Read(Node):
 
 class Image(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
-		extra.pop("classes") #DOTCLASS
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	eat_arguments = eat_arguments
@@ -653,7 +675,6 @@ class Image(Node):
 
 class CSS(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
-		extra.pop("classes") #DOTCLASS
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	eat_arguments = eat_arguments
@@ -675,7 +696,6 @@ class CSS(Node):
 
 class JS(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
-		extra.pop("classes") #DOTCLASS
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	eat_arguments = eat_arguments
@@ -697,7 +717,6 @@ class JS(Node):
 
 class Date(Node):
 	def __init__(self, tag, attrib={}, text="", tail="", **extra):
-		extra.pop("classes") #DOTCLASS
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	eat_arguments = eat_arguments

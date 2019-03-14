@@ -6,6 +6,8 @@ File info
 from treebuilder import treebuilder
 import xml.etree.ElementTree as ET
 
+PRESETS = {"simple"}
+
 def presetbuilder(preset):
 	# HACK: __file__ returns module path
 	from pathlib import Path
@@ -46,7 +48,7 @@ def addup(**options):
 	root = treebuilder(ifile, dir=options.get("dir"))
 
 	doctype = root.get("doctype")
-	if root.get("doctype") != "html":
+	if root.get("doctype") in PRESETS:
 		preset = presetbuilder(doctype)
 		root = wrap(root, preset, options.get("name"))
 
