@@ -141,7 +141,7 @@ class Addup(Node):
 
 	# element token patterns
 	token_patterns = [
-		r"(?=^|[^\\])\+(?P<addup>[\w\-\.]+)",
+		r"(?=^|[^\\])\+(?P<addup>[\w\-]+)",
 		r"(?=^|[^\\])(?P<code>`+)",
 		r"(?=^|[^\\])(?P<math>\$+)",
 		r"(?=^|[^\\])(?P<comment>//)",
