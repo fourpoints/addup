@@ -22,6 +22,7 @@ def commandline_options():
 	parser.add_argument("-f", "--outfile", default=None,
 		type=check_valid_ext("output file", ".html"), help='The output .html-file.')
 	parser.add_argument("-n", "--name", default=None, help='The name of the .html-file.')
+	parser.add_argument("-b", "--base", default=None, help='The directory of the template bases.')
 	parser.add_argument("-x", "--extension", nargs="*", default=None, help='Extensions (NotImplemented).')
 
 	options = parser.parse_args()
@@ -29,6 +30,7 @@ def commandline_options():
 	options.infile = options.infile
 	options.name = options.name or options.outfile.stem
 	options.dir = options.infile.parent
+	options.base = options.base or options.dir
 
 	if options.extension is None: options.extension = []
 

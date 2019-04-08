@@ -2,6 +2,7 @@ import re
 import xml.etree.ElementTree as ET
 import mumath
 import textwrap
+from pathlib import Path
 
 # Allows for the exec() to be used to run code while compiling
 EXEC = False
@@ -18,14 +19,14 @@ def get_doctype(root):
 		root.set("doctype", m['type'])
 		root.text = root.text[m.end():]
 
-def treebuilder(file_path, dir, **options):
+def treebuilder(file_path : Path, **options) -> ET.Element:
 	"""
 	This function does things
 	"""
 
 	# reset directory
 	global pathstack
-	pathstack = dir
+	pathstack = file_path.parent # REDUNDANCY: same as file_path.parent?
 
 	root = Addup("root")
 

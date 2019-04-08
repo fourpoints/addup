@@ -6,33 +6,37 @@ File info
 from treebuilder import treebuilder
 import xml.etree.ElementTree as ET
 
-PRESETS = {"simple"}
-
-def presetbuilder(preset):
-	# HACK: __file__ returns module path
+def get_base_path(base, local):
 	from pathlib import Path
-	dir = Path(__file__).parent / "presets"
 
-	preset_file = dir / f"{preset}.add"
-	preset_root = treebuilder(preset_file, dir)
+	# HACK: __file__ returns module path
+	default = Path(__file__).parent / "bases"
 
-	return preset_root
+	L = set(map(lambda f: f.stem, Path(local).glob('*.add')))
+	D = set(map(lambda f: f.stem, Path(default).glob('*.add')))
 
-def wrap(root, preset, name):
-	"""Inserts root into preset"""
+	if base in L: return Path(f"{local}/{base}.add")
+	if base in D: return Path(f"{default}/{base}.add")
+
+	return None
+
+
+def wrap(root, base, name):
+	"""Inserts root into base"""
 
 	# Find insertion point
-	wrapper = filter(lambda e:'add' in e.attrib, preset.iter()).__next__()
+	wrapper = filter(lambda e:'add' in e.attrib, base.iter()).__next__()
 	wrapper.attrib.pop('add') # remove attrib
 
-	# Insert root into preset
+	# Insert root into base
 	for element in root: wrapper.append(element)
 
 	# Find title element
-	title = filter(lambda e:'title'==e.tag, preset.iter()).__next__()
+	title = filter(lambda e:'title'==e.tag, base.iter()).__next__()
 	title.text = name
 
-	return preset
+	return base
+
 
 def addup(**options):
 
@@ -45,12 +49,13 @@ def addup(**options):
 
 	### BUILD TREE
 	ifile = options.get("infile")
-	root = treebuilder(ifile, dir=options.get("dir"))
+	root = treebuilder(ifile)
 
 	doctype = root.get("doctype")
-	if root.get("doctype") in PRESETS:
-		preset = presetbuilder(doctype)
-		root = wrap(root, preset, options.get("name"))
+	base_path = get_base_path(doctype, options.get("base"))
+	if base_path: # templating
+		template = treebuilder(base_path)
+		root = wrap(root, template, options.get("name"))
 
 	### POST-PROCESSING
 	NotImplemented
