@@ -82,7 +82,7 @@ def block(node, text):
 
 def eat_arguments(node, text):
 	DEL = r'(?P<argend>\))|(?P<has_value>=)'
-	ATTR = r'\s*(?P<attribute>[\w\-:\.@]+)\s*'
+	ATTR = r'\s*(?P<attribute>[\w\-:\.#]+)\s*'
 	VAL = r'\s*"(?P<value>.*?)"\s*'
 
 	tokens = re.compile('|'.join((VAL, ATTR, DEL))).finditer(text)
@@ -103,10 +103,10 @@ def eat_arguments(node, text):
 			return text[mo.end():]
 
 def eat_classifiers(node, text):
-	classifiers = re.compile(r"(?P<CLASSID>[\.@][\w\-]+)+").match(text)
+	classifiers = re.compile(r"(?P<CLASSID>[\.#][\w\-]+)+").match(text)
 
-	# first element will be empty string, then every other element will be a separator (. or @) with the succeeding element the class/id name.
-	classifier_list = re.split("([\.@])", text[:classifiers.end()])
+	# first element will be empty string, then every other element will be a separator (. or #) with the succeeding element the class/id name.
+	classifier_list = re.split("([\.#])", text[:classifiers.end()])
 
 	classifier_iter = iter(classifier_list[1:])
 	# groups two at a time
@@ -119,7 +119,7 @@ def eat_classifiers(node, text):
 			node.attrib[attribute] = value
 
 	for classifier_token, classifier_name in classifier_tuples:
-		classifier_type = "id" if classifier_token == "@" else "class"
+		classifier_type = "id" if classifier_token == "#" else "class"
 		extend_attribute(classifier_type, classifier_name)
 
 	return text[classifiers.end():]
@@ -161,10 +161,10 @@ class Addup(Node):
 	eat_inline      = inline           # (bracketed)
 	eat_block       = block            #     indented block
 	eat_arguments   = eat_arguments    # (attribute="value")
-	eat_classifiers = eat_classifiers  # .class@id
+	eat_classifiers = eat_classifiers  # .class#id
 
 	def eat(self, text):
-		has_classifier = re.compile(r"(?P<CLASSID>[\.@][\w\-]+)+").match(text)
+		has_classifier = re.compile(r"(?P<CLASSID>[\.#][\w\-]+)+").match(text)
 		if has_classifier:
 			text = self.eat_classifiers(text)
 
