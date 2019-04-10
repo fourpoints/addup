@@ -62,8 +62,8 @@ text
 #### attributes
 `+tag(attribute="value")` are comma-separated entries. This will be converted to `<tag attribute="value"></tag>`.
 
-##### .class and @id
-`+span.hello@world` Multiple classes and ids may be added by using CSS selector style syntax. This will be converted to `<span class="hello" id="world"></span>`
+##### .class and #id
+`+span.hello#world` Multiple classes and ids may be added by using CSS selector style syntax. This will be converted to `<span class="hello" id="world"></span>`
 
 #### inline vs block
 the following addup text
