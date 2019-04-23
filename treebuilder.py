@@ -637,8 +637,7 @@ class Image(Node):
 	def parse(self):
 		path = pathstack / self.attrib.pop("src")
 		try:
-			_, ext = path.rsplit('.', 1)
-			if ext == "svg":
+			if path.suffix == ".svg":
 				self.tag = "svg"
 				svg_file = ET.parse(path).getroot()
 				self.attrib.update(svg_file.attrib)
