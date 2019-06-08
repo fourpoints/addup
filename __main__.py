@@ -26,9 +26,9 @@ def commandline_options():
 	parser.add_argument("-x", "--extension", nargs="*", default=None, help='Extensions (NotImplemented).')
 
 	options = parser.parse_args()
-	options.outfile = options.outfile or options.infile.with_suffix('.html')
+	options.name = options.name or options.infile.stem
+	options.outfile = options.outfile or Path(options.name).with_suffix('.html') or options.infile.with_suffix('.html')
 	options.infile = options.infile
-	options.name = options.name or options.outfile.stem
 	options.dir = options.infile.parent
 	options.base = options.base or options.dir
 

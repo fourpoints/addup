@@ -2,6 +2,5 @@
 File info
 """
 
-from .core import addup
-
-__all__ = ["addup"]
+# FIXME: No idea if this is necessary
+__all__ = ["addup", "treebuilder", "treeprinter", "node"]
