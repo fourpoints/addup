@@ -9,37 +9,42 @@
 ```
 +doctype(html)
 +html:
-	+head:
-		+title: Ipsum lorem
-		+meta(charset = "utf-8")
+  +head:
+    +title: Ipsum lorem
+    +meta(charset = "utf-8")
 
-	+body: //comment
-		+Section:
-			+h3: heading
-			sample text sample text sample
-			sample text sample +b(text sample
-			text) sample text +br
-			+ul:
-				+li: +a(href = "example.com"):(link name)
-				+li: +a(href = "example.com"):(link name)
+  +body: //comment
+    +Section:
+      +h3: heading
+      +p:
+        sample text sample text sample
+        sample text sample +b(text sample
+        text) sample text
+      +br
+      +ul:
+        +li: +a(href = "example.com"):(link name)
+        +li: +a(href = "example.com"):(link name)
 ```
 ```html
 <!doctype html>
 <html>
 <head>
-	<title>Ipsum lorem</title>
-	<meta charset="utf-8">
+  <title>Ipsum lorem</title>
+  <meta charset="utf-8">
 </head>
 <body><!--comment-->
-	<div class="section">
-		<h3>heading</h3>
-		sample text sample text sample
-		sample text sample <b>text sample
-		text</b> sample text <br>
-		<ul>
-			<li><a href="example.com">link name</a></li>
-			<li><a href="example.com">link name</a></li>
-		</ul>
+  <div class="section">
+    <h3>heading</h3>
+    <p>
+      sample text sample text sample
+      sample text sample <b>text sample
+      text</b> sample text
+    </p>
+    <br>
+    <ul>
+      <li><a href="example.com">link name</a></li>
+      <li><a href="example.com">link name</a></li>
+    </ul>
 </body>
 </html>
 ```
@@ -48,12 +53,12 @@
 `+tag(attribute="value"):(content)` creates opening and closing tags around the indented block. Note that `+ tag` will be ignored by the interpreter. The `tag` must be followed by a space/newline ("` `", "`\n`") or an opening bracket ("`(`").
 ```
 +div: text
-	text
+  text
 text
 ```
 ```html
 <div>text
-	text
+  text
 <div>
 text
 ```
@@ -69,14 +74,14 @@ text
 the following addup text
 ```
 +div:
-	all text in the indented block will be wrapped in <div></div> tags.
-	+span:(all text inside brackets will be wrapped in  <span></span> tags)
+  all text in the indented block will be wrapped in <div></div> tags.
+  +span:(all text inside brackets will be wrapped in  <span></span> tags)
 ```
 will be converted to
 ```html
 <div>
-	all text in the indented block will be wrapped in <div></div> tags.
-	<span>all text inside brackets will be wrapped in  <span></span> tags</span>
+  all text in the indented block will be wrapped in <div></div> tags.
+  <span>all text inside brackets will be wrapped in  <span></span> tags</span>
 </div>
 ```
 
@@ -103,11 +108,11 @@ tetxt +div //
 `` `(lang) content` `` is highlighted with pygments
 
 #### Math
-`$(align) $` is shorthand for `\begin{align*} \end{align*}`. Simple math may also be used `$x+y$`, and will be rendered in MathML using mumath.
+`$(align) math$` is sconverted to an aligned mathml. Simple and complex math may also be used `$x+y$`, and will be rendered in MathML using mumath. The syntax is latex-like, with some minor quirks (read: ~~bugs~~ features).
 
 
 #### +style and +script will escape all addup-syntax
-So you don't have to worry about your JavaScript-comments becoming HTML-styled.
+So you don't have to worry about your JavaScript-comments becoming HTML-styled. You can also use +css and +js to directly write the content of the css and js files to the html file.
 
 #### +read(file = "name.ext")
 `+read(file = "file.extension")` will start reading from another file, allowing you to easily combine multiple files into a single output file.  
@@ -118,12 +123,12 @@ ipsum lorem
 addup file:
 ```
 +div:
-	+read(file="file.txt", tag="span")
+  +read(file="file.txt", tag="span")
 ```
 HTML output:
 ```
 <div>
-	<span>ipsum lorem</span>
+  <span>ipsum lorem</span>
 </div>
 ```
 The content will be enclosed by a tag of choice or `<div></div>` if none are specified.
@@ -165,6 +170,6 @@ Custom tags must be defined using lower case letters in the json-file, but tags 
 -->
 
 ### Conventions
-- tabs > spaces  
+- tabs <> spaces  
 - underscore\_case > camelCase  
 - green > blue
