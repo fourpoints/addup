@@ -4,13 +4,11 @@ import re
 from pathlib import Path
 
 try: # feels hacky
-	from .node import Addup
+	from . import node
 except ImportError:
-	from node import Addup
+	import node
 
-
-pathstack : Path = None
-
+# - [ ] improve pathstacking
 
 ### --------    --------    --------    --------
 
@@ -19,6 +17,7 @@ def get_base_path(base, local):
 	from pathlib import Path
 
 	# HACK: __file__ returns module path
+	# actually nothing in here, cos setup ignores it
 	default = Path(__file__).parent / "bases"
 
 	L = set(map(lambda f: f.stem, Path(local).glob('*.add')))
@@ -27,7 +26,8 @@ def get_base_path(base, local):
 	if base in L: return Path(f"{local}/{base}.add")
 	if base in D: return Path(f"{default}/{base}.add")
 
-	return None
+	print("Base not found. Extending failed.")
+	return ""
 
 
 def get_wrap_node(base):
@@ -59,8 +59,8 @@ def treebuilder(file_path : Path, **options) -> ET.Element:
 	bases = options.get('base') or file_path.parent
 
 	# reset directory
-	global pathstack
-	pathstack = file_path.parent # REDUNDANCY: same as file_path.parent?
+	old_path = node.pathstack # revert after extending
+	node.pathstack = file_path.parent
 
 
 	with open(file_path, mode="r", encoding="utf-8") as file:
@@ -75,12 +75,13 @@ def treebuilder(file_path : Path, **options) -> ET.Element:
 		wrap = get_wrap_node(root)
 		wrap.parse(text)
 	elif "doctype" in type_:
-		root = Addup("root")
+		root = node.Addup("root")
 		root.parse(text)
+		node.pathstack = old_path
 
 		root.set("type", type_.get("doctype"))
 	else: # no type_
-		root = Addup("root")
+		root = node.Addup("root")
 		root.parse(text)
 
 	return root

@@ -27,8 +27,8 @@ def commandline_options():
 
 	options = parser.parse_args()
 	options.name = options.name or options.infile.stem
-	options.outfile = options.outfile or Path(options.name).with_suffix('.html') or options.infile.with_suffix('.html')
-	options.infile = options.infile
+	options.outfile = options.outfile or options.infile.with_suffix('.html')
+	options.infile = options.infile or Path(options.name).with_suffix('.html') 
 	options.dir = options.infile.parent
 	options.base = options.base or options.dir
 

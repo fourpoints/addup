@@ -8,6 +8,11 @@ import textwrap
 import mumath
 import re
 
+from pathlib import Path
+
+
+pathstack : Path = None
+
 
 # Allows for the exec() to be used to run code while compiling (experimental feature)
 EXEC = False
@@ -148,8 +153,8 @@ class Addup(Node):
 
 	eat_inline      = eat_inline           # (bracketed)
 	eat_block       = eat_block            #     indented block
-	eat_arguments   = eat_arguments    # (attribute="value")
-	eat_classifiers = eat_classifiers  # .class#id
+	eat_arguments   = eat_arguments        # (attribute="value")
+	eat_classifiers = eat_classifiers      # .class#id
 
 	def eat(self, text):
 		has_classifier = re.compile(r"(?P<CLASSID>[\.#][\w\-]+)+").match(text)
@@ -196,7 +201,7 @@ class Addup(Node):
 				return {
 					"style"  : Raw,
 					"script" : Raw,
-					"math"   : Math, # for mathjax, deprecated
+					"math"   : MathJax, # for mathjax, deprecated
 					"read"   : Read, # for content loading, for backwards-comp.
 					"content": Read,
 					"image"  : Image,
@@ -216,7 +221,7 @@ class Addup(Node):
 				"math"    : math,
 				"comment" : comment,
 			}.get(element_type, addup)(tag)
-
+	
 			child_text, text = child.eat(text)
 			child.parse(child_text)
 
@@ -457,7 +462,7 @@ class Code(Node):
 		)
 
 
-class Math(Node):
+class MathJax(Node):
 	# substitution patterns
 	sub_patterns = {
 		"&": "&amp;",
@@ -544,14 +549,14 @@ class Read(Node):
 	def eat(self, text):
 		has_argument = re.compile(r"(?P<ARGUMENT>\()").match(text)
 		if has_argument:
-			nothing, inedible_text = self.eat_arguments(text)
+			text = self.eat_arguments(text)
 
 		try:
 			self.tag = self.attrib.pop("tag")
 		except KeyError:
 			self.tag = "div" #default
 
-		return "", inedible_text
+		return "", text
 
 	def parse(self, text):
 		"""text argument is unused"""
@@ -577,10 +582,10 @@ class Read(Node):
 				"raw"   : Raw,
 			}[parser]("root")
 			template_root.attrib = self.attrib.copy() #buggy?
-			template_root.text = ifile.read()
-			template_root.parse()
+			template_root.parse(ifile.read())
 
-			pathstack = pathstack.parent
+			#FIXME? : If relative_path is '.', then this incorrectly jumps up in the hierarchy
+			#pathstack = pathstack.parent
 
 			self.text = template_root.text
 			for child in template_root:
@@ -596,9 +601,9 @@ class Image(Node):
 	def eat(self, text):
 		has_argument = re.compile(r"(?P<ARGUMENT>\()").match(text)
 		if has_argument:
-			nothing, inedible_text = self.eat_arguments(text)
+			text = self.eat_arguments(text)
 
-		return "", inedible_text
+		return "", text
 
 	def parse(self, text):
 		"""text argument is unused"""
@@ -649,12 +654,12 @@ class CSS(Node):
 	def eat(self, text):
 		has_argument = re.compile(r"(?P<ARGUMENT>\()").match(text)
 		if has_argument:
-			nothing, inedible_text = self.eat_arguments(text)
+			text = self.eat_arguments(text)
 
 		self.parse()
 		self.tag = "style"
 
-		return "", inedible_text
+		return "", text
 
 	def parse(self, text):
 		"""text argument is unused"""
@@ -671,7 +676,7 @@ class JS(Node):
 	def eat(self, text):
 		has_argument = re.compile(r"(?P<ARGUMENT>\()").match(text)
 		if has_argument:
-			nothing, text = self.eat_arguments(text)
+			text = self.eat_arguments(text)
 
 		self.tag = "script"
 
