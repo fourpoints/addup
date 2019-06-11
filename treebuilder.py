@@ -56,7 +56,7 @@ def treebuilder(file_path : Path, **options) -> ET.Element:
 	"""
 
 	file_path = Path(file_path)
-	bases = options.get('base') or file_path.parent
+	bases = options.get('bases') or file_path.parent
 
 	# reset directory
 	old_path = node.pathstack # revert after extending
@@ -83,5 +83,8 @@ def treebuilder(file_path : Path, **options) -> ET.Element:
 	else: # no type_
 		root = node.Addup("root")
 		root.parse(text)
+		node.pathstack = old_path
+
+	# FIXME node.pathstack = old_path for all cases?
 
 	return root

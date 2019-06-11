@@ -49,6 +49,8 @@ def eat_inline(node, text):
 				# We start from 1 because we don't want the opening bracket
 				inline_text, text = text[1:mo.start()], text[mo.end():]
 				break
+	else:
+		print("Unmatched bracket for inline element")
 
 	return inline_text, text
 
@@ -564,7 +566,10 @@ class Read(Node):
 
 		relative_path = self.attrib.pop("loc")
 		path = pathstack / relative_path
-		with open(path, mode='r') as ifile:
+
+		old_path = pathstack
+		pathstack = path.parent
+		with open(path, mode='r', encoding="utf-8") as ifile:
 			import os
 			if os.path.dirname(relative_path):
 				pathstack / os.path.dirname(ifile.name)
@@ -582,10 +587,10 @@ class Read(Node):
 				"raw"   : Raw,
 			}[parser]("root")
 			template_root.attrib = self.attrib.copy() #buggy?
+			
 			template_root.parse(ifile.read())
 
-			#FIXME? : If relative_path is '.', then this incorrectly jumps up in the hierarchy
-			#pathstack = pathstack.parent
+			pathstack = old_path
 
 			self.text = template_root.text
 			for child in template_root:
@@ -608,6 +613,7 @@ class Image(Node):
 	def parse(self, text):
 		"""text argument is unused"""
 		path = pathstack / self.attrib.pop("src")
+		
 		try:
 			if path.suffix == ".svg":
 				self.tag = "svg"

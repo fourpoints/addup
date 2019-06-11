@@ -45,6 +45,7 @@ XML = {
 }
 
 
+
 # html writer
 def htmlprinter(file, root, compact=True, doctype="html"):
 	if doctype: file.write(f"<!DOCTYPE {doctype}>")
@@ -63,7 +64,10 @@ def treeprinter(file, tree, level, nl, tab):
 	if tree.tag not in INLINE: file.write(nl+level*tab)
 
 	# semi-redundant: adds newlien if math is displaystyled (depends on child)
-	if tree.tag == "math" and tree[0].tag == "mtable" and tree[0].get("displaystyle", False): file.write(nl + level*tab)
+	try:
+		if tree.tag == "math" and tree[0].tag == "mtable" and tree[0].get("displaystyle", False):file.write(nl + level*tab)
+	except IndexError:
+		print("<math> element without children encountered.")
 
 	if tree.tag is ET.Comment:
 		file.write(f"<!--")
