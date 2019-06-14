@@ -223,7 +223,7 @@ class Addup(Node):
 				"math"    : math,
 				"comment" : comment,
 			}.get(element_type, addup)(tag)
-	
+
 			child_text, text = child.eat(text)
 			child.parse(child_text)
 
@@ -427,6 +427,9 @@ class Code(Node):
 
 
 		if '\n' in text or "block" in self.keys():
+			# remove pseudo-attribute
+			self.attrib.pop("block", None)
+
 			type_ = "block"
 			if "numbering" in self.keys():
 				line_numbering = "table"
@@ -587,7 +590,7 @@ class Read(Node):
 				"raw"   : Raw,
 			}[parser]("root")
 			template_root.attrib = self.attrib.copy() #buggy?
-			
+
 			template_root.parse(ifile.read())
 
 			pathstack = old_path
@@ -613,7 +616,7 @@ class Image(Node):
 	def parse(self, text):
 		"""text argument is unused"""
 		path = pathstack / self.attrib.pop("src")
-		
+
 		try:
 			if path.suffix == ".svg":
 				self.tag = "svg"
@@ -711,7 +714,7 @@ class Date(Node):
 		self.set("datetime", date.today())
 
 		return "", text
-	
+
 	def parse(self, text):
 		"""text argument is unused"""
 		pass
