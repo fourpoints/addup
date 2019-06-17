@@ -140,7 +140,7 @@ class Addup(Node):
 		r"(?=^|[^\\])(?P<code>`+)",
 		r"(?=^|[^\\])(?P<math>\$+)",
 		r"(?=^|[^\\])(?P<comment>//)",
-		r"(?P<eof>\Z)", # fix : rename to <eol>
+		r"(?P<eof>\Z)", # End of string
 	]
 
 	# compile
@@ -157,6 +157,27 @@ class Addup(Node):
 	eat_block       = eat_block            #     indented block
 	eat_arguments   = eat_arguments        # (attribute="value")
 	eat_classifiers = eat_classifiers      # .class#id
+
+	nodes = {
+		"addup" : lambda tag: {
+				"style"  : Raw,
+				"script" : Raw,
+				"math"   : MathJax, # for mathjax, deprecated
+				"read"   : Read, # for content loading, for backwards-comp.
+				"content": Read,
+				"image"  : Image,
+				"css"    : CSS,
+				"js"     : JS,
+				"now"    : Date,
+
+				"update" : mumath.UpdateContext, # for mumath, deprecated
+				"clear"  : mumath.ClearContext, # for mumath, deprecated
+			}.get(tag, Addup)(tag = tag),
+		"code" : lambda tag: Code(tag = "template", token = tag),
+		"math" : lambda tag: mumath.Math(tag = "math", token = tag),
+		"comment" : lambda tag: Comment(tag = ET.Comment),
+	}
+
 
 	def eat(self, text):
 		has_classifier = re.compile(r"(?P<CLASSID>[\.#][\w\-]+)+").match(text)
@@ -199,38 +220,16 @@ class Addup(Node):
 		while element_type != "eof":
 			tag = mo.group(element_type)
 
-			def addup(tag):
-				return {
-					"style"  : Raw,
-					"script" : Raw,
-					"math"   : MathJax, # for mathjax, deprecated
-					"read"   : Read, # for content loading, for backwards-comp.
-					"content": Read,
-					"image"  : Image,
-					"css"    : CSS,
-					"js"     : JS,
-					"now"    : Date,
+			child = self.nodes.get(element_type)(tag)
 
-					"update" : mumath.UpdateContext, # for mumath, deprecated
-					"clear"  : mumath.ClearContext, # for mumath, deprecated
-				}.get(tag, Addup)(tag = tag)
-			code = lambda tag: Code(tag = "template", token = tag)
-			math = lambda tag: mumath.Math(tag = "math", token = tag)
-			comment = lambda tag: Comment(tag = ET.Comment)
-
-			child = {
-				"code"    : code,
-				"math"    : math,
-				"comment" : comment,
-			}.get(element_type, addup)(tag)
+			if child is None:
+				print(f"Unknown element type {element_type} encountered.")
 
 			child_text, text = child.eat(text)
 			child.parse(child_text)
 
 			if isinstance(child, ET.Element):
 				self.append(child)
-
-			if element_type == "eof": break
 
 			mo = Addup.tp.search(text)
 			element_type = mo.lastgroup
@@ -520,7 +519,7 @@ class Comment(Node):
 		"\\[^\\]": "",
 	}
 
-	def __init__(self, tag, attrib={}, text="", tail="", **extra):
+	def __init__(self, tag=ET.Comment, attrib={}, text="", tail="", **extra):
 		super().__init__(tag, attrib.copy(), text, tail, **extra)
 
 	#REMOVE?
