@@ -664,7 +664,6 @@ class CSS(Node):
 		if has_argument:
 			text = self.eat_arguments(text)
 
-		self.parse()
 		self.tag = "style"
 
 		return "", text
@@ -672,7 +671,7 @@ class CSS(Node):
 	def parse(self, text):
 		"""text argument is unused"""
 		path = pathstack / self.attrib.pop("href")
-		with open(path, mode='r') as css_file:
+		with open(path, mode='r', encoding="utf-8") as css_file:
 			self.text = css_file.read()
 
 class JS(Node):
@@ -693,7 +692,7 @@ class JS(Node):
 	def parse(self, text):
 		"""text argument is unused"""
 		path = pathstack / self.attrib.pop("src")
-		with open(path, mode='r') as js_file:
+		with open(path, mode='r', encoding="utf-8") as js_file:
 			self.text = js_file.read()
 
 class Date(Node):
