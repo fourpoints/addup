@@ -3,9 +3,12 @@
 File info
 """
 
-from treebuilder import treebuilder
-from treeprinter import htmlprinter
-
+try:
+	from treebuilder import treebuilder
+	from treeprinter import htmlprinter
+except ImportError:
+	from .treebuilder import treebuilder
+	from .treeprinter import htmlprinter
 
 def addup(**options):
 

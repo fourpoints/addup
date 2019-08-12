@@ -6,7 +6,10 @@ File info
 import argparse
 from pathlib import Path
 import sys
-from core import addup
+try: # feels hacky
+	from core import addup
+except ImportError:
+	from .core import addup
 
 def commandline_options():
 	def check_valid_ext(filetype, valid_ext):
@@ -28,7 +31,7 @@ def commandline_options():
 	options = parser.parse_args()
 	options.name = options.name or options.infile.stem
 	options.outfile = options.outfile or options.infile.with_suffix('.html')
-	options.infile = options.infile or Path(options.name).with_suffix('.html') 
+	options.infile = options.infile or Path(options.name).with_suffix('.html')
 	options.dir = options.infile.parent
 	options.base = options.base or options.dir
 
