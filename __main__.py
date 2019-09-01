@@ -27,6 +27,7 @@ def commandline_options():
 	parser.add_argument("-n", "--name", default=None, help='The name of the .html-file.')
 	parser.add_argument("-b", "--base", default=None, help='The directory of the template bases.')
 	parser.add_argument("-x", "--extension", nargs="*", default=None, help='Extensions (NotImplemented).')
+	parser.add_argument("-p", "--pretty", default=True, action="store_false", help="Pretty readable printing.")
 
 	options = parser.parse_args()
 	options.name = options.name or options.infile.stem

@@ -30,7 +30,10 @@ def addup(**options):
 	ofile = options.get("outfile")
 	with open(ofile, mode="w", encoding="utf-8") as file:
 		# import sys; file = sys.stdout # For testing
-		htmlprinter(file, root, compact=True, doctype=root.get("type"))
+		htmlprinter(file, root,
+			compact = options.get("pretty"),
+			doctype = root.get("type"),
+		)
 
 
 

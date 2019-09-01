@@ -49,15 +49,15 @@ XML = {
 # html writer
 def htmlprinter(file, root, compact=True, doctype="html"):
 	if doctype: file.write(f"<!DOCTYPE {doctype}>")
-	
+
 	for subtree in root:
 		# for readability
 		if compact:
-			treeprinter(file, subtree, level=0, nl='', tab='')
+			treeprinter(file, subtree, level=0, nl="", tab="")
 
 		# for compactness
 		else:
-			treeprinter(file, subtree, level=0, nl='\n', tab=' ')
+			treeprinter(file, subtree, level=0, nl="\n", tab="  ")
 
 # sample writer
 def treeprinter(file, tree, level, nl, tab):
