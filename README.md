@@ -72,8 +72,10 @@ text
 #### attributes
 `+tag(attribute="value")` are comma-separated entries. This will be converted to `<tag attribute="value"></tag>`.
 
+
 ##### .class and #id
-`+span.hello#world` Multiple classes and ids may be added by using CSS selector style syntax. This will be converted to `<span class="hello" id="world"></span>`
+`+span.hello#world` Multiple classes and ids may be added by using CSS selector style syntax. This will be converted to `<span class="hello" id="world"></span>`. This is equivalent to writing `+span(class="hello", id="world)`, however combining the two ways of writing classes and ids may result in overwriting.
+
 
 #### inline vs block
 the following addup text
@@ -108,6 +110,7 @@ text \+div \//
 ```html
 tetxt +div //
 ```
+This is particularly useful for writing links as text; `https:/\/github.com`. Link in attributes are unaffected by this.
 
 #### Code
 `` `(lang) content` `` is highlighted with pygments
