@@ -108,22 +108,24 @@ will be converted to
 text \+div \//
 ```
 ```html
-tetxt +div //
+text +div //
 ```
 This is particularly useful for writing links as text; `https:/\/github.com`. Link in attributes are unaffected by this.
 
 #### Code
-`` `(lang) content` `` is highlighted with pygments
+`` `(lang) content` `` is highlighted with pygments, where `lang` is a language such as `py` or `cpp`. The first argument must be the language, the second can be `block` or `numbering`. The code will automatically be a `block` if there are newlines in the code.
 
 #### Math
-`$(align) math$` is sconverted to an aligned mathml. Simple and complex math may also be used `$x+y$`, and will be rendered in MathML using mumath. The syntax is latex-like, with some minor quirks (read: ~~bugs~~ features).
+`$(format) math$` is converted to an aligned mathml, where `format` can be dropped (along with brackets), or `align` for aligned math, or `numbering` for equation numbering (will number every line). Simple and complex math may also be used `$x+y$`, and will be rendered in MathML using mumath. The syntax is latex-like, with some minor quirks (read: ~~bugs~~ features).
 
+#### +now
+`+now(format="%Y-%m-%d")` will make a `<time>` element containing the date in the given format. The syntax may change in the future, to avoid exclusion of xml elements with the same name.
 
 #### +style and +script will escape all addup-syntax
 So you don't have to worry about your JavaScript-comments becoming HTML-styled. You can also use +css and +js to directly write the content of the css and js files to the html file.
 
 #### +read(file = "name.ext")
-`+read(file = "file.extension")` will start reading from another file, allowing you to easily combine multiple files into a single output file.  
+`+read(file = "file.extension")` will start reading from another file, allowing you to easily combine multiple files into a single output file. The syntax may change in the future, to avoid exclusion of xml elements with the same name.
 file.txt:
 ```txt
 ipsum lorem
