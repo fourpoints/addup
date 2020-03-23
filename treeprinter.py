@@ -87,7 +87,7 @@ def treeprinter(file, tree, level, nl, tab):
 	if tree.text:
 		lines = tree.text.splitlines()
 		file.write(lines[0])
-		if tree.tag == "pre" or tree.tag == "table" and "highlighttable" in tree.attrib.get("class", ""):
+		if tree.tag == "pre" or tree.tag == "table" and "pyg-table" in tree.attrib.get("class", ""):
 			for line in lines[1:]:
 				# print(1, line)
 				file.write('\n' + line) # nl?
@@ -98,7 +98,7 @@ def treeprinter(file, tree, level, nl, tab):
 	# subtree recursion
 	if tree:
 		for subtree in tree:
-			if subtree.tag == "pre" or subtree.tag == "table" and "highlighttable" in subtree.get("class", ""):
+			if subtree.tag == "pre" or subtree.tag == "table" and "pyg-table" in subtree.get("class", ""):
 				treeprinter(file, subtree, level=0, nl=nl, tab=tab)
 			else:
 				treeprinter(file, subtree, level=level+1, nl=nl, tab=tab)

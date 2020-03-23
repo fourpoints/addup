@@ -347,9 +347,9 @@ class Code(Node):
 			    return self._wrap_code(source)
 
 			def _wrap_code(self, source):
-			    yield 0, f'<code class="highlight">'
+			    yield 0, f'<code class="code">'
 			    for i, t in source:
-			        yield i, f'<span class="line">{t}</span>'
+			        yield i, f'<span class="pyg__row">{t}</span>'
 			    yield 0, '</code>'
 
 			def _wrap_tablelinenos(self, inner):
@@ -403,15 +403,15 @@ class Code(Node):
 				# some configurations seem to mess up the formatting...
 				if nocls:
 					yield 0, (#'<table class="%stable">' % self.cssclass +
-								'<tr><td><div class="linenodiv" '
+								'<tr><td><div class="pyg__linenodiv" '
 								'style="background-color: #f0f0f0; padding-right: 10px">'
 								'<pre style="line-height: 125%">' +
-								ls + '</pre></div></td><td class="code">')
+								ls + '</pre></div></td><td class="pyg__code">')
 				else:
 					yield 0, (#'<table class="%stable">' % self.cssclass +
-								'<tr><td class="linenos"><div class="linenodiv"><pre>' +
-								ls + '</pre></div></td><td class="code">')
-				yield 0, f'<pre class="code {lang}">' + dummyoutfile.getvalue() + '</pre>'
+								'<tr><td class="pyg__linenos"><div class="pyg__linenodiv"><pre>' +
+								ls + '</pre></div></td><td class="pyg__code">')
+				yield 0, f'<pre class="code code--block">' + dummyoutfile.getvalue() + '</pre>' #NOTE "code--{lang}" could be re-added
 				yield 0, '</td></tr>'#</table>'
 
 		class InlineHtmlFormatter(HtmlFormatter):
@@ -434,16 +434,16 @@ class Code(Node):
 				line_numbering = "table"
 				self.attrib.pop("numbering", None)
 				self.tag = "table"
-				self.attrib.setdefault("class", []).append("highlighttable")
+				self.attrib.setdefault("class", []).append("pyg-table")
 			else:
 				line_numbering = False
 				self.tag = "pre"
-				self.attrib.setdefault("class", []).append(f"code {lang}")
+				self.attrib.setdefault("class", []).append(f"code code--block")
 		else:
 			self.tag = "code"
 			type_ = "inline"
 			line_numbering = False
-			self.attrib.setdefault("class", []).append("inline highlight")
+			self.attrib.setdefault("class", []).append(f"code code--inline")
 
 		#get the formatter(s)
 		formatter = {
@@ -701,15 +701,39 @@ class Date(Node):
 
 	eat_arguments = eat_arguments
 
+	SUB = {
+		"{year}" : "%Y",
+		"{month}" : "%m",
+		"{day}" : "%d",
+		"{hr}" : "%H",
+		"{min}" : "%M",
+	}
+
 	def eat(self, text):
 		has_argument = re.compile(r"(?P<ARGUMENT>\()").match(text)
 		if has_argument:
 			text = self.eat_arguments(text)
 
 		self.tag = "time"
-		from datetime import date
-		self.text = str(date.today())
-		self.set("datetime", date.today())
+		from datetime import datetime
+
+		now = datetime.now()
+
+		if "unix" in self.keys():
+			self.attrib.pop("unix", None)
+			now = now.replace(year=now.year-1970)
+
+
+		if format := self.attrib.pop("format", None):
+			for bracket, pct in Date.SUB.items():
+				format = format.replace(bracket, pct)
+		else:
+			format = "%Y-%m-%d"
+
+		# Only 4-digits years are supported;
+		# earlier years are prepended with 0s.
+		self.text = now.strftime(format).lstrip("0")
+		self.set("datetime", now.strftime(format))
 
 		return "", text
 
