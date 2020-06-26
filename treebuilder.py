@@ -45,7 +45,7 @@ def get_type(text):
 	# If it does, it trims of the first line.
 	# Note: this does not read the content of the doctype specification.
 	m = re.match(r"\+(?P<key>doctype|extend)\((?P<type>\w*)\)\s", text)
-	
+
 	# FIXME when None-aware operators exist
 	return (text[m.end():], {m['key'] : m['type']}) if m else (text, {})
 
@@ -65,7 +65,7 @@ def treebuilder(file_path : Path, **options) -> ET.Element:
 
 	with open(file_path, mode="r", encoding="utf-8") as file:
 		text = file.read()
-	
+
 	text, type_ = get_type(text)
 
 

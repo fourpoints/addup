@@ -5,9 +5,11 @@ File info
 
 try:
 	from treebuilder import treebuilder
+	from treemodifier import treemodifier
 	from treeprinter import htmlprinter
 except ImportError:
 	from .treebuilder import treebuilder
+	from .treemodifier import treemodifier
 	from .treeprinter import htmlprinter
 
 def addup(**options):
@@ -24,7 +26,7 @@ def addup(**options):
 	root = treebuilder(ifile)
 
 	### POST-PROCESSING
-	NotImplemented
+	root = treemodifier(root)
 
 	### PRINT ELEMENTTREE TO FILE
 	ofile = options.get("outfile")

@@ -451,7 +451,7 @@ class Code(Node):
 				linenos       = line_numbering,
 				linenostart   = 1, # start counting lineno from 1
 				lineanchors   = f"no_anchor",
-				lineseparator = "<br>",
+				lineseparator = "<br/>",
 			),
 			"inline": InlineHtmlFormatter(
 				lineseparator = "",
