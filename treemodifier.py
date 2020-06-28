@@ -367,19 +367,19 @@ def footnotes(tree):
         note.extend(list(footnote))
 
         # clear footnote after moving content
-        for child in footnote: footnote.remove(child)
+        for child in list(footnote): footnote.remove(child)
 
         footnote.tag = "sup"
         footnote.attrib.setdefault("class", []).append("footnote")
         footnote.set("id", f"footnote-{i}")
         footnote.text = f"{i}"
 
-
         # make pointer
         ref = ET.Element("a")
         ref.set("href", f"#footnote-pointer-{i}")
 
         _branch(footnote, ref)
+
 
     return tree
 
