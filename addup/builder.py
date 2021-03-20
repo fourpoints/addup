@@ -2,96 +2,31 @@ import re
 import textwrap
 from pathlib import Path
 from html import escape as html_escape
-from .node import Element, Text, Comment
+from .node import Element, Text, Comment, Document
 
 
-"""
-Elements are created in two stages
-First the head is found, ```() or +tag() or $$()
-depending on its attributes and config, then we process its content.
-this unifies all +elements at the head stage, and adds flexibility
-at the processing stage. This may also be useful code and math.
-
-[x] todo separate content (blocked, inline, fenced) from parser
-  - i.e. make it a 2-tuple like (div, block), (span, inline)
-[x] 3-steps
-    * read header, content
-    * process header
-    * process content
-    either HEAD FENCE CONTENT or FENCE HEAD CONTENT
-
-[x] todo printer
-
-for v4 preprocess blocks to brackets? so we can parse until fence-end;
-blocks complicate this a bit.
-"""
-
-r"""
-[ ] Figure out how to register addup-types, i.e.
-    [ ] normal (default, +div, +span, +h1)
-    [ ] special i (+math, +code)
-    [ ] special ii (+doctype, +current-time)
-    [ ] special iii (templates, +main-heading)
-    * templates may be implemented with special syntax, but most are simple
-      and can more easily be implemented with builder functions. Few templates
-      are needed, so implementing an interface seems unnecessary. This is
-      backend anyway, and won't affect syntax.
-      * point here is that templates should be independent of syntax and may
-        only be used to enhance the creation of templates with objects instead
-        of builder functions.
-    * build templates from leaf up; only allow descendants to be modified.
-    # (\+\w+) is faster than (\+[a|b|c]+)
-[ ] Templates/Base/Extension
-    Link to separate files or included within?
-    * special iii are converted in POSTPROCESSING
-    Keep it simple, don't end up like xslt
-    * no loops.
-    * defunctionalize; don't make it too complicated, stick to a few types
-    [ ] alias (eg. fig-title -> h3.fig-title; makes post-processing simpler.)
-    [ ] toc
-    [ ] enumeration (tables, figures, listings, equations)
-    [ ] references
-    [ ] footnotes
-    [ ] tags-list
-    [ ] title
-    [ ] figures (fig-title, fig-caption, fig-content?, fig-tag?)
-[ ] Two layers: outer (open/close expr), inner (parser)
-[ ] Arguments before block? Block before argument?
-[ ] <meta> arguments? two-way templates?
-[ ] Pipe dream: Variables? Global context?
-[ ] printer matches tags; text | comment | text;
-    * only special cases should be special
-
-+head[[body]]tail-
-whole vs fragments/particles
-"""
-
-# <https://en.wikipedia.org/wiki/Head%E2%80%93body_pattern>
-
-r"""
-mumath?
-$$#triangle
-a^2 + b^2 = c^2
-
-// If last term is non-number, print dots, then non-number
-\sum_{n=1}^{\infty}{a_i^n} = \expand\sum_{n=1}^{\infty}{a_i^n}
-:= a_i^1 + a_i^2 + \cdots + a_i^\infty
-
-// If no last number, print dots only
-\sum_{n=1}{a_i^n} = \expand\sum_{n=1}{a_i^n}
-:= a_i^1 + a_i^2 + \cdots
-
-// If last term is number, print all
-\{\expand\sum_{n=0}^{6}{x^n}\} = \{x_0 + x_1 + x_2 + x_3 + x_4 + x_5 + x_6\}
-
-// \expand\sum vs \esum?
-$$
-"""
+# TODO
+# html_escape for < and > (not &)
 
 
 def build(el, text, **kwargs):
     Addup.parse_content(el, text, **kwargs)
     return el
+
+
+def treebuilder(file_path: Path, **options) -> Element:
+    file_path = Path(file_path)
+    base = file_path.parent
+
+    # use io.String or memoryview or mmap?
+    with open(file_path, mode="r", encoding="utf-8") as file:
+        text = file.read()
+
+    root = Element(tag="DOCUMENT")
+    Addup.parse_content(root, text, base=base)
+
+    return root
+
 
 class ContentParser:
     pass
@@ -127,7 +62,7 @@ class Bracket(ContentParser):
             if bracket_count == 0:
                 return text, ""
             else:
-                raise SyntaxError("Unmatched bracket for bracketed text")
+                raise SyntaxError("Unmatched bracket for bracketed text:\n{text}".format(text=text))
 
 
 class Block(ContentParser):
@@ -367,7 +302,7 @@ class Addup(TreeBuilder):
         while match := cls.heads.search(text):
             text, tail = text[:match.start()], text[match.end():]
 
-            if text: el.append(Text(html_escape(text)))
+            if text: el.append(Text(text))
 
             name = match.lastgroup
             fence = match.group(name)
@@ -375,7 +310,7 @@ class Addup(TreeBuilder):
 
             text = ctx.parse(el, fence, tail, **kwargs)
 
-        if text: el.append(Text(html_escape(text)))
+        if text: el.append(Text(text))
 
 
 class Timepoint(Addup):
@@ -416,9 +351,8 @@ class Source(Addup):
 
     @staticmethod
     def _read(path, **kwargs):
-        return str(path)
-        # with open(path, mode='r', encoding="utf-8") as file:
-        #     return file.read()
+        with open(path, mode='r', encoding="utf-8") as file:
+            return file.read()
 
 
 class CSS(Source):
@@ -460,6 +394,8 @@ class Code(TreeBuilder):
     @classmethod
     def parse_content(cls, el, text, **kwargs):
         from pygments.lexers import get_lexer_by_name
+        from pygments.lexers.special import TextLexer
+        from pygments.util import ClassNotFound
         from .formatters.code import ElementFormatter, treehighlight
 
         keys = (
@@ -470,7 +406,15 @@ class Code(TreeBuilder):
         attrib = el.attrib
         options = {key: attrib.pop(key) for key in keys if key in attrib}
 
-        lexer = get_lexer_by_name(options.get("lang"))
+        if "multiline" not in options:
+            options["wrap"] = "inline"
+
+        try:
+            lang = options.get("lang") or kwargs.get("code_lang")
+            lexer = get_lexer_by_name(lang)
+        except ClassNotFound:
+            lexer = TextLexer()
+
         formatter = ElementFormatter(**options)
 
         treehighlight(code=text, lexer=lexer, formatter=formatter, root=el)
@@ -491,7 +435,7 @@ class Code(TreeBuilder):
 
 class Math(TreeBuilder):
     head_pattern = r"(?=^|[^\\])(?P<math>\$+)"
-    counter = 1
+    counter = 0
 
     @staticmethod
     def parse_head(el, text):
@@ -514,8 +458,17 @@ class Math(TreeBuilder):
         if "multiline" in options:
             options["align"] = options.pop("multiline", False)
 
-        mp = MathParser(**options)
-        mp.parse(text=text, root=el)
+        if "linenos" in options:
+            options["linenostart"] = cls.counter + 1
+
+            mp = MathParser(**options)
+            mp.parse(text=text, root=el)
+
+            lines = el.find("mtable")
+            cls.counter += len(lines)
+        else:
+            mp = MathParser(**options)
+            mp.parse(text=text, root=el)
 
 
     @classmethod
@@ -614,46 +567,20 @@ class Add(Addup):
         return text
 
     @staticmethod
-    def _build(src, **kwargs):
-        el = Element(None)
+    def _build(src, base, **kwargs):
+        root = Document()
+        path = base / src
 
-        with open(src, mode="r", encoding="utf-8") as f:
+        with open(path, mode="r", encoding="utf-8") as f:
             text = f.read()
 
-        build(el, text, **kwargs)
-        return el
+        # NOTE circular dependency
+        from .core import _addup
+        root = _addup(root, text, base=base, **kwargs)
+
+        return root
 
 
 Addup.register((Addup, Code, Math, InlineComment))
 Addup.compile()
 Addup.register_element((Timepoint, CSS, JS, Style, Script, Image, Add))
-
-# [x] "style"  : Raw,
-# [x] "script" : Raw,
-# [-] "math"   : MathJax, # for mathjax, deprecated
-# [-] "read"   : Read, # for content loading, for backwards-comp.
-# [-] "content": Read, # for content loading, for backwards-comp.
-# [ ] "add"    : Read, # +add? +block? fragment? particle?
-#            - add(src="") for children, +add[empty] for extends
-# [ ] "image"  : Image,
-# [x] "css"    : CSS,
-# [x] "js"     : JS,
-# [x] "now"    : Date.parse_content,
-
-
-def treebuilder(file_path: Path, **options) -> Element:
-    """
-    This function does things
-    """
-
-    file_path = Path(file_path)
-    base = file_path.parent
-
-    # use io.String or memoryview or mmap?
-    with open(file_path, mode="r", encoding="utf-8") as file:
-        text = file.read()
-
-    root = Element(tag="DOCUMENT")
-    Addup.parse_content(root, text, base=base)
-
-    return root

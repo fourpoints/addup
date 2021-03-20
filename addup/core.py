@@ -4,15 +4,7 @@ from .reshaper import shape
 from .writer import ElementWriter
 
 
-def addup(**options):
-    filename = options["file"]
-    out = options["out"]
-    root = Document()
-
-    with open(filename, mode="r", encoding="utf-8") as f:
-        text = f.read()
-
-
+def _addup(root, text, **options):
     ### LOAD EXTENSIONS
     #extensions = options.get("extension")
     NotImplemented
@@ -21,17 +13,32 @@ def addup(**options):
     # todo: fix formatting etc.
 
     ### BUILD TREE
-    root = build(root, text, base=filename.parent)
+    root = build(root, text, **options)
 
     ### POST-PROCESSING
-    root = shape(root)
+    root = shape(root, **options)
+
+    return root
 
 
-    p = options.get("pretty")
+def addup(filename, out=None, **options):
+    base = filename.parent
+    p = options.pop("pretty", False)
     print_options = dict(indent="  "*p, level=0, lsep="\n"*p, xml=False)
 
+    root = Document()
+
+    with open(filename, mode="r", encoding="utf-8") as f:
+        text = f.read()
+
+
+    root = _addup(root, text, base=base)
+
+
     ### PRINT ELEMENTTREE TO FILE
-    # import sys
-    # ElementWriter.write(sys.stdout.write, root, **print_options)
-    with open(out, mode="w", encoding="utf-8") as file:
-        ElementWriter.write(file.write, root, **print_options)
+    if out is not None:
+        with open(out, mode="w", encoding="utf-8") as file:
+            ElementWriter.write(file.write, root, **print_options)
+    else:
+        import sys
+        ElementWriter.write(sys.stdout.write, root, **print_options)

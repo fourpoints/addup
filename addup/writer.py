@@ -57,7 +57,7 @@ class ElementWriter:
             if ltag in EMPTY:
                 write(indent*level + f'<{el.tag}{attributes}/>' + lsep)
 
-            elif ltag == "pre":
+            elif ltag in {"pre", "code"}:
                 write(indent*level + f'<{el.tag}{attributes}>')
                 for child in el:
                     cls._write(write, child, "", level+1, lsep="", xml=xml)
