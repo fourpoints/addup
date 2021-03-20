@@ -21,14 +21,14 @@ def _addup(root, text, **options):
     return root
 
 
-def addup(filename, out=None, **options):
-    base = filename.parent
+def addup(file, out=None, **options):
+    base = file.parent
     p = options.pop("pretty", False)
     print_options = dict(indent="  "*p, level=0, lsep="\n"*p, xml=False)
 
     root = Document()
 
-    with open(filename, mode="r", encoding="utf-8") as f:
+    with open(file, mode="r", encoding="utf-8") as f:
         text = f.read()
 
 
