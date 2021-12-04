@@ -6,11 +6,11 @@ from .writer import ElementWriter
 
 def _addup(root, text, **options):
     ### LOAD EXTENSIONS
-    #extensions = options.get("extension")
-    NotImplemented
+    # extensions = options.get("extension")
+    # NotImplemented
 
     ### POST-PROCESSING
-    # todo: fix formatting etc.
+    # fix formatting etc.
 
     ### BUILD TREE
     root = build(root, text, **options)
@@ -21,24 +21,34 @@ def _addup(root, text, **options):
     return root
 
 
-def addup(file, out=None, **options):
-    base = file.parent
-    p = options.pop("pretty", False)
-    print_options = dict(indent="  "*p, level=0, lsep="\n"*p, xml=False)
+class Addup:
+    def __init__(self, **options):
+        self.options = options
+        self.root = Document()
 
-    root = Document()
+    @property
+    def print_options(self):
+        n = self.options.pop("pretty", False)
+        return {"indent":"   "*n, "level": 0, "lsep": "\n"*n, "xml": False}
 
-    with open(file, mode="r", encoding="utf-8") as f:
-        text = f.read()
+    def convert(self, text, **options):
+        self.root = _addup(self.root, text, **options)
 
+    def convert_file(self, file, output, encoding="utf-8"):
+        with open(file, mode="r", encoding=encoding) as f:
+            text = f.read()
 
-    root = _addup(root, text, base=base)
+        self.convert(text, base=file.parent)
 
+        if output is not None:
+            self.write(output, encoding)
+        else:
+            self.print()
 
-    ### PRINT ELEMENTTREE TO FILE
-    if out is not None:
-        with open(out, mode="w", encoding="utf-8") as file:
-            ElementWriter.write(file.write, root, **print_options)
-    else:
+    def write(self, output, encoding="utf-8"):
+        with open(output, mode="w", encoding=encoding) as file:
+            ElementWriter.write(file.write, self.root, **self.print_options)
+
+    def print(self):
         import sys
-        ElementWriter.write(sys.stdout.write, root, **print_options)
+        ElementWriter.write(sys.stdout.write, self.root, **self.print_options)

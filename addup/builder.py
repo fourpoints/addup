@@ -5,12 +5,13 @@ from html import escape as html_escape
 from .node import Element, Text, Comment, Document
 
 
-# TODO
+# to-do
 # html_escape for < and > (not &)
 
 
 def build(el, text, **kwargs):
     Addup.parse_content(el, text, **kwargs)
+    Math.counter = 0
     return el
 
 
@@ -180,7 +181,7 @@ def parse_fence_attributes(node, text):
 
     attributes = _attributes(text)
 
-    fatt, fval = next(attributes)
+    fatt, fval = next(attributes, (None, None))
 
     LANG_ALIAS = {
         # TODO check if these are necessary
@@ -209,6 +210,7 @@ def parse_fence_attributes(node, text):
 
     if "linenos" in node.attrib:
         node.set("linenostart", node.get("linenos") or 1)
+        node.set("linenos", True)
 
     return trail
 
@@ -336,7 +338,7 @@ class Source(Addup):
     tag: str
     attributes: dict
     path: str
-    suffixes: {str}  # TODO check that suffix(es) matches?
+    # suffixes: {str}  # TODO check that suffix(es) matches?
 
     @classmethod
     def parse_content(cls, el, text, **kwargs):
@@ -491,7 +493,10 @@ class InlineComment(TreeBuilder):
 
     @staticmethod
     def parse(parent, tag, text, **kwargs):
-        comment, text = text.split("\n", maxsplit=1)
+        if "\n" in text:
+            comment, text = text.split("\n", maxsplit=1)
+        else:
+            comment, text = text, ""
 
         parent.append(Comment(comment))
 
@@ -499,6 +504,33 @@ class InlineComment(TreeBuilder):
 
 
 class Image(Addup):
+    @staticmethod
+    def _prefix(tree, namespaces):
+        uri_prefix = {v:f"{k}:" if k else k for k, v in namespaces.items()}
+
+        def _has_uri(name):
+            return name.startswith("{")
+
+        def _prefix(name):
+            uri, name = name[1:].rsplit("}", 1)
+            return uri_prefix[uri] + name
+
+        for el in tree.iter():
+            if _has_uri(el.tag):
+                el.tag = _prefix(el.tag)
+
+            for key in el.keys():
+                if _has_uri(key):
+                    el.set(_prefix(key), el.attrib.pop(key))
+
+    @staticmethod
+    def _namespaces(path):
+        import xml.etree.ElementTree as ET
+        return dict(
+            node for _event, node
+            in ET.iterparse(path, events=['start-ns'])
+        )
+
     @classmethod
     def parse_content(cls, el, text, base, **kwargs):
         """text argument is unused"""
@@ -510,22 +542,13 @@ class Image(Addup):
                 el.tag = "svg"
                 svg = parse(path).getroot()
                 el.attrib.update(svg.attrib)
-                el.attrib["height"] = "100%"
-                el.attrib["width"]  = "100%"
+                # el.attrib["height"] = "100%"
+                # el.attrib["width"]  = "100%"
 
-                # this is not a general solution
-                ns = {
-                    "": "http://www.w3.org/2000/svg",
-                    "xlink": "http://www.w3.org/1999/xlink",
-                }
-
-                # remove ns["0"] from tags
-                for c in svg.iter():
-                    c.tag = c.tag.split('}', 1)[1]
-
-                # remove ns["1"] from the href-attrib for use-tags
-                for c in svg.iter("use"):
-                    c.attrib['href'] = c.attrib.pop(f'{{{ns["xlink"]}}}href')
+                # convert from {uri}tag to prefix:tag
+                # this is a *bad* solution,
+                # but etree interface is limited
+                cls._prefix(svg, cls._namespaces(path))
 
                 # proceed as usual
                 for c in svg:
@@ -544,6 +567,7 @@ class Image(Addup):
 
 class Add(Addup):
     # Alternatively this could be part of post-processing
+    # NOTE: this is for attaching, not extending
 
     @classmethod
     def _parse(cls, parent, tag, text, **kwargs):

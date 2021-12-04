@@ -1,1 +1,1 @@
-from .core import addup
+from .core import Addup

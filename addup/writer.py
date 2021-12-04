@@ -86,7 +86,6 @@ class ElementWriter:
 
     @classmethod
     def _fallback_writer(cls, write, el, indent, level, lsep, xml):
-
         attributes = cls._attributes(el)
 
         ltag = el.tag.lower()
@@ -96,10 +95,11 @@ class ElementWriter:
 
         write(indent*level + f'<{el.tag}{attributes}>' + lsep)
         if el.text:
-            write(indent*level + el.text + lsep)
+            write(indent*level + el.text.strip() + lsep)
         if len(el) != 0:
             for child in el:
                 cls._fallback_writer(write, child, indent, level+1, lsep, xml)
-            write(indent*level + child.tail + lsep)
+            if child.tail is not None:
+                write(indent*level + child.tail.strip() + lsep)
 
         write(indent*level + f'</{el.tag}>' + lsep)
