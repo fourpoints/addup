@@ -98,7 +98,7 @@ def Tokenizer(text):
         return text[p+1:p+j], j
 
     def attributes(p):
-        attribute, j = collect_bracketed(p)
+        _attribute, j = collect_bracketed(p)
         return MAction("NULL", {"unfinished": "unfinished"}, "ATTRIBUTE", [1]),j
 
     def class_(p):
@@ -180,18 +180,34 @@ def Tokenizer(text):
             return (MObject("mo", {}, "sep", text[p]), p + 1)
 
     def lessgreaterequal(p):
-        if text[p+1] == "=":
-            if text[p] == "<":
-                return (MObject("mo", {}, "relation", "≤"), p + 2)
-            if text[p] == ">":
-                return (MObject("mo", {}, "relation", "≥"), p + 2)
+        if text[p:p+3] == "<=>":
+            return MObject("mo", {}, "arrow", "⇔"), p+3
+        elif text[p:p+2] == "<=":
+            return (MObject("mo", {}, "relation", "≤"), p + 2)
+        elif text[p:p+2] == ">=":
+            return (MObject("mo", {}, "relation", "≥"), p + 2)
+        else:
+            return (MObject("mo", {}, "relation", text[p]), p + 1)
+
+    def not_(p):
+        if text[p+1:] == "=":
+                return MObject("mo", {}, "relation", "≠"), p + 2
+        else:
+            return MObject("mo", {"form": "infix"}, "operator", text[p]), p + 1
+
+    def relation(p):
+        if text[p:p+3] == "==>":
+            return (MObject("mo", {}, "arrow", "⇒"), p + 3)
+        elif text[p:p+3] == "-->":
+            return (MObject("mo", {}, "arrow", "→"), p + 3)
+        elif text[p:p+1] == "-":
+            return (MObject("mo", {"form": "infix"}, "operator", "-"), p + 1)
         else:
             return (MObject("mo", {}, "relation", text[p]), p + 1)
 
 
     # Simple tokens
     operator = lambda p: (MObject("mo", {"form": "infix"}, "operator", text[p]), p + 1)
-    relation = lambda p: (MObject("mo", {}, "relation", text[p]), p + 1)
 
     sep = lambda p: (MAction("mo", {"fence": "true"}, "SEP", text[p]), p + 1)
     eol      = lambda p: (MAction("NULL", {}, "EOL", text[p]), p + 1)
@@ -207,8 +223,9 @@ def Tokenizer(text):
     CHAR_TOKENS = {
         "alpha"    : dict.fromkeys(iter(ALPHABET), alpha),
         "numeric"  : dict.fromkeys(iter("0123456789"), numeric),
-        "operator" : dict.fromkeys(iter("+-*/'!#%"), operator),
-        "relation" : dict.fromkeys(iter("="), relation),
+        "operator" : dict.fromkeys(iter("+*'!#%"), operator),
+        "not"      : dict.fromkeys(iter("/!"), not_),
+        "relation" : dict.fromkeys(iter("-="), relation),
         "lge"      : dict.fromkeys(iter("<>"), lessgreaterequal),
         "open"     : dict.fromkeys(iter("{[("), open_),
         "close"    : dict.fromkeys(iter("}])"), close),
@@ -309,7 +326,7 @@ def fence(tokens):
 
 
 def changes(tokens):
-    """add class to elements between \[\) and \(\] (may overlap)
+    r"""add class to elements between \[\) and \(\] (may overlap)
     """
     prev = False
     next_ = False
@@ -354,7 +371,7 @@ def changes(tokens):
 
 
 def invisibles(tokens):
-    """This adds the semantically &it; and &af;
+    r"""This adds the semantically &it; and &af;
     where they are suitable:
 
     [var/numeric/constant/close]  [space -> it]  [var/numeric/constant/open]
@@ -506,7 +523,7 @@ def classify(tree):
 
 
 def process(tree):
-    """Uses tree manipulators such as \vec, \sup, \pre and _^
+    r"""Uses tree manipulators such as \vec, \sup, \pre and _^
     """
     def grouper(tree, p):
         action = tree.children[p]
