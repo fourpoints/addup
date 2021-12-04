@@ -30,7 +30,7 @@ class ElementFormatter(Formatter):
             self._ctags = ctags.CTags(self.tagsfile)
 
 
-        linenos = options.get('linenos', False)
+        linenos = options.get("linenos", False)
 
         self.lang = options.get("lang", "")  # language
         self.wrap = options.get("wrap", "block")  # inline | block | table
