@@ -199,7 +199,7 @@ class ElementFormatter(Formatter):
             if value is not None:
                 _el = Element(tag)
                 _el.append(el)
-                _el.set(attrib, val)
+                _el.set(attribute, value)
                 return _el
             else:
                 return el

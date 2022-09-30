@@ -25,7 +25,7 @@ ACCENTS = {
 	r"\check": ("mover", {"accent": "true"}, "ACCENT", "&check;"),
 	r"\acute": ("mover", {"accent": "true"}, "ACCENT", "&acute;"),
 	r"\grave": ("mover", {"accent": "true"}, "ACCENT", "&grave;"),
-	r"\bar": ("mover", {"accent": "true"}, "ACCENT", "&horbar;"),
+	r"\bar": ("mover", {"accent": "true"}, "ACCENT", "&macr;"),
 	r"\vec": ("mover", {"accent": "true"}, "ACCENT", "&rarr;"), # "&#8407;"),
 	r"\dot": ("mover", {"accent": "true"}, "ACCENT", "&dot;"),
 	#"\ddot": "&ddot;",

@@ -457,6 +457,8 @@ class Math(TreeBuilder):
         attrib = el.attrib
         options = {key: attrib.pop(key) for key in keys if key in attrib}
 
+        options["area"] = options["lang"]
+
         if "multiline" in options:
             options["align"] = options.pop("multiline", False)
 
